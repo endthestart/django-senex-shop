@@ -1,0 +1,4 @@
+include README.rst
+recursive-include senex_shop/docs *
+recursive-include senex_shop/templates *
+recursive-include senex_shop/fixtures *

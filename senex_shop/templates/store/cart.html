@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static from staticfiles %}
+{% load currency_filters %}
+{% load thumbnail %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+    <div class="sixteen columns"><h1>{% trans "Shopping Cart" %}</h1></div>
+    <div class="eleven columns">
+        {% if not cart.num_items %}
+            <h2>{% trans "Your shopping cart is empty." %}</h2>
+        {% else %}
+            {% for cart_item in cart_items %}
+                <div class="cart-item-box">
+                    <div class="cart-image">
+                        <img style="display: block; vertical-align: top;"
+                             src="{% thumbnail cart_item.product.main_image.image 140x140 crop %}" alt="product image"/>
+                    </div>
+                    <div class="none" style="display: inline-block; width: 70%; vertical-align: top;">
+                        <div class="cart-product-description">
+                            <h4 class="cart-item-description"><a
+                                    href="{{ cart_item.product.get_absolute_url }}">{{ cart_item.description }}</a></h4>
+                            {% if cart_item.has_details %}
+                                <ul>
+                                    {% for detail in cart_item.details.all %}
+                                        <li>{{ detail.name }}: {{ detail.value }}</li>
+                                    {% endfor %}
+                                    <li>Qty: {{ cart_item.quantity }} @ {{ cart_item.unit_price|currency }}</li>
+                                </ul>
+                            {% endif %}
+                        </div>
+                        {#                        <form class="inline-form" id="form-{{ cart_item.id }}"#}
+                        {#                              action="{% url 'cart_quantity' %}" method="post">{% csrf_token %}#}
+                        {#                            <input type="hidden" name="cart_item" value="{{ cart_item.id }}"/>#}
+                        {#                            <input style="width: 30px; display: inline;" type="text" name="quantity"#}
+                        {#                                   id="id_quantity" value="{{ cart_item.quantity }}"/>#}
+                        {#                            <input type="submit" id="id_update_submit" value="{% trans 'Update' %}"/>#}
+                        {#                        </form>#}
+                        <form class="inline-form" action="{% url 'cart_remove' %}"
+                              method="post">{% csrf_token %}
+                            <input type="hidden" name="cart_item" value="{{ cart_item.id }}"/>
+                            <input style="padding: 6px;" type="submit" value="{% trans 'Remove' %}"/>
+                        </form>
+                    </div>
+                    <br class="clear"/>
+
+                    <div style="position: absolute; top: 10px; right: 10px;"
+                         class="cart-item-line-price">{{ cart_item.line_total|currency }}</div>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+    <div class="five columns cart-summary">
+        <div class="cart-summary-inner">
+            <h2 class="rule add-bottom">Cart Summary</h2>
+            <h5 class="rule add-top add-bottom">{{ cart.num_items }} Item{{ cart.num_items|pluralize }}</h5>
+
+            <div class="rule">
+                <h5>Subtotal: {{ cart.total_price|currency }}</h5>
+
+                <p>*Taxes and shipping charges may apply.</p>
+            </div>
+            <a href="{% url 'checkout_start' %}" class="button button-checkout">{% trans "Checkout" %}</a>
+        </div>
+    </div>
+{% endblock %}

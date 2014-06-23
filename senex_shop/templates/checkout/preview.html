@@ -1,0 +1,24 @@
+{% extends 'checkout/checkout.html' %}
+{% load i18n %}
+{% load static from staticfiles %}
+
+{% block title %}{% trans "Checkout - Payment Details" %}{% endblock %}
+
+{% block checkout_progress %}
+    {% include 'checkout/progress.html' with step=3 %}
+{% endblock %}
+
+{% block page_title %}{% trans "Review Order" %}{% endblock page_title %}
+
+{% block place_order %}
+    <hr/>
+    <form action="" method="POST" id="payment-form">{% csrf_token %}
+        <input type="hidden" name="stripeToken" value="{{ stripe_token }}"/>
+        <input type="hidden" name="action" value="place_order"/>
+
+        <div class="preview-form-bottom">
+            <button type="submit" class="place-order-button">Place Order</button>
+        </div>
+    </form>
+{% endblock place_order %}
+

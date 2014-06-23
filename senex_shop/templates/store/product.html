@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static from staticfiles %}
+
+{% block title %}{{ product.name }}{% endblock %}
+
+{% block content %}
+    <div class="category-navigation sixteen columns">
+        {% block breadcrumbs %}
+            <a href="{% url 'store_home' %}">Home</a> {% for ancestor in product.category.get_ancestors %} >
+            <a href="{{ ancestor.get_absolute_url }}">{{ ancestor.name }}</a>{% endfor %}
+        {% endblock breadcrumbs %}
+    </div>
+    <div class="sixteen columns"><p>{{ product.name }}: {{ product.description }}</p></div>
+    <div class="sixteen columns">Add some customization stuff here.</div>
+
+    <form action="" method="post">{% csrf_token %}
+        <input type="hidden" name="product_id" value="{{ product.pk }}">
+        <input type="hidden" name="product_type" value="{{ product }}">
+        <input type="hidden" name="option_group_id" value="{{ option_group.pk }}"
+        {% for option in option_group.option_set.all %}
+            <label>{{ option.name }}</label>
+            <select name="options[{{ option.pk }}]">
+                <option value="None">--- Select One ---</option>
+                {% for value in option.values.all %}
+                    <option value="{{ value.id }}">{{ value.name }} +{{ value.price_change }}</option>
+                {% endfor %}
+            </select>
+        {% endfor %}
+        <input type="submit" value="Add To Cart"/>
+    </form>
+{% endblock %}

@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% load url from future %}
+{% load currency_filters %}
+{% load thumbnail %}
+{% load i18n %}
+{% load staticfiles %}
+
+{% block title %}
+    {% trans "Confirmation of order" %} {{ order.number }}
+{% endblock title %}
+
+{% block content %}
+    {% block checkout_progress %}
+        <div class="sixteen columns progress-container">
+            <div class="progress">
+                <ul class="progress-inner">
+                    <li class="step1"><span>{% trans "1. Shipping" %}</span></li>
+                    <li class="step2"><span>{% trans "2. Payment Info" %}</span></li>
+                    <li class="step3"><span>{% trans "3. Review Order" %}</span></li>
+                    <li class="step4 active"><span>{% trans "4. Confirmation" %}</span></li>
+                </ul>
+            </div>
+        </div>
+    {% endblock %}
+
+    <div class="payment-page sixteen columns">
+
+        <h2 class="page-title">{% block page_title %}{% trans "Order Confirmation" %}{% endblock %}</h2>
+
+        <p>{% trans "Thank you for your order" %}</p>
+
+        <p class="remove-bottom remove-top"><span class="label label-success">Order Number: {{ order.number }}</span>
+        </p>
+
+        <p class="remove-bottom remove-top"><span class="label label-success">You will receive an email confirmation shortly.</span>
+        </p>
+
+        <p class="remove-top"><a onclick="window.print()" href="#"
+                                 class="btn btn-primary btn-block btn-large">{% trans "Print this page" %}</a></p>
+
+        {% block shipping_address %}
+            <div class="sub-header"><h2>{% trans "Shipping" %}</h2></div>
+            <div class="shipping-address">
+                <h4>{% trans "Address" %}</h4>
+                <address>
+                    {% for field in order.shipping_address.active_address_fields %}
+                        {{ field }}<br/>
+                    {% endfor %}
+                </address>
+
+                {% if order.shipping_address.phone_number %}
+                    <h4>{% trans "Contact" %}</h4>
+                    <p>
+                        {% trans "Phone" %}: {{ order.shipping_address.phone_number }}
+                        {% if order.guest_email %}
+                            <br/>{% trans "Email" %}: {{ order.guest_email }}
+                        {% endif %}
+                    </p>
+                {% endif %}
+            </div>
+            <div class="shipping-instructions">
+                <h4>{% trans "Instructions" %}</h4>
+                {% if order.shipping_address.notes %}
+                    <p>{{ order.shipping_address.notes|escape }}</p>
+                {% else %}
+                    <p>None</p>
+                {% endif %}
+            </div>
+        {% endblock %}
+
+        {% block payment_info %}
+
+        {% endblock %}
+
+        {% block order_details %}
+
+            <div class="sub-header"><h2>{% trans "Order details" %}</h2></div>
+            {% for cart_item in order.cart.cartitem_set.all %}
+                <div class="cart-item-box">
+                    <div class="none" style="display: inline-block; width: 70%; vertical-align: top;">
+                        <div class="cart-product-description">
+                            <h4 class="cart-item-description"><a
+                                    href="{{ cart_item.product.get_absolute_url }}">{{ cart_item.description }}</a></h4>
+                            {% if cart_item.has_details %}
+                                <ul>
+                                    {% for detail in cart_item.details.all %}
+                                        <li>{{ detail.name }}: {{ detail.value }}</li>
+                                    {% endfor %}
+                                    <li>Qty: {{ cart_item.quantity }} @ {{ cart_item.unit_price|currency }}</li>
+                                </ul>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <br class="clear"/>
+
+                    <div style="position: absolute; top: 10px; right: 10px;"
+                         class="cart-item-line-price">{{ cart_item.line_total|currency }}</div>
+                </div>
+            {% endfor %}
+
+
+        {% endblock order_details %}
+
+        {% block order_tracking %}
+
+        {% endblock order_tracking %}
+
+    </div>
+{% endblock content %}

@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load url from future %}
+{% load currency_filters %}
+{% load static staticfiles %}
+{% load thumbnail %}
+
+{% block title %}{% trans "Checkout" %} | {{ block.super }}{% endblock %}
+
+{% block content %}
+    <div class="payment-page">
+        {% block checkout_progress %}
+            {% include 'checkout/progress.html' %}
+        {% endblock %}
+        {% if error %}
+            <div class="alert alert-error">
+                {{ error }}
+            </div>
+        {% endif %}
+        <div class="sixteen columns">
+            <h2 class="page-title">{% block page_title %}{% trans "Checkout" %}{% endblock %}</h2>
+        </div>
+        <div class="eleven columns">
+            {% block order_contents %}
+                <div class="sub-header"><h2>{% trans "Cart Items" %}</h2></div>
+                {% if not cart.num_items %}
+                    <h2>{% trans "Your shopping cart is empty." %}</h2>
+                {% else %}
+                    {% for cart_item in cart.cartitem_set.all %}
+                        <div class="cart-item-box">
+                            <div class="cart-image">
+                                <img style="display: block; vertical-align: top;"
+                                     src="{% thumbnail cart_item.product.main_image.image 140x140 crop %}"
+                                     alt="product image"/>
+                            </div>
+                            <div class="none" style="display: inline-block; width: 70%; vertical-align: top;">
+                                <div class="cart-product-description">
+                                    <h4 class="cart-item-description"><a
+                                            href="{{ cart_item.product.get_absolute_url }}">{{ cart_item.description }}</a>
+                                    </h4>
+                                    {% if cart_item.has_details %}
+                                        <ul>
+                                            {% for detail in cart_item.details.all %}
+                                                <li>{{ detail.name }}: {{ detail.value }}</li>
+                                            {% endfor %}
+                                            <li>Qty: {{ cart_item.quantity }} @ {{ cart_item.unit_price|currency }}</li>
+                                        </ul>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <br class="clear"/>
+
+                            <div style="position: absolute; top: 10px; right: 10px;"
+                                 class="cart-item-line-price">{{ cart_item.line_total|currency }}</div>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% block order_contents_actions %}
+                    <div class="form-actions">
+                        <a href="{% url 'cart' %}" class="btn">{% trans "Edit order contents" %}</a>
+                    </div>
+                {% endblock %}
+            {% endblock order_contents %}
+            {% block shipping_address %}
+                <div class="sub-header"><h2>{% trans "Shipping" %}</h2></div>
+                {% if shipping_address %}
+                    <div class="shipping-address">
+                        <h4>{% trans "Address" %}</h4>
+                        <address>
+                            {% for field in shipping_address.active_address_fields %}
+                                {{ field }}<br/>
+                            {% endfor %}
+                        </address>
+
+                        {% if shipping_address.phone_number %}
+                            <h4>{% trans "Contact" %}</h4>
+                            <p>
+                                {% trans "Phone" %}: {{ shipping_address.phone_number }}
+                                {% if guest_email %}
+                                    <br/>{% trans "Email" %}: {{ guest_email }}
+                                {% endif %}
+                            </p>
+                        {% endif %}
+                    </div>
+                    <div class="shipping-instructions">
+                        <h4>{% trans "Instructions" %}</h4>
+                        {% if shipping_address.notes %}
+                            <p>{{ shipping_address.notes|escape }}</p>
+                        {% else %}
+                            <p>None</p>
+                        {% endif %}
+                    </div>
+                    {% block shipping_address_actions %}
+                        <div class="alert-actions">
+                            <a href="{% url 'checkout_shipping_address' %}"
+                               class="btn">{% trans "Edit shipping address" %}</a>
+                        </div>
+                    {% endblock %}
+                {% endif %}
+            {% endblock shipping_address %}
+
+            {% block payment_details %}
+            {% endblock payment_details %}
+
+            {% block place_order %}
+            {% endblock place_order %}
+        </div>
+        <div class="five columns cart-summary">
+            <div class="cart-summary-inner">
+                <h2 class="rule add-bottom">Cart Summary</h2>
+                <h5 class="rule add-top add-bottom">{{ cart.num_items }} Item{{ cart.num_items|pluralize }}</h5>
+
+                <div class="rule">
+                    <h5>Subtotal: {{ cart.total_price|currency }}</h5>
+
+                    <p>*Taxes and shipping charges my apply.</p>
+                </div>
+                <div class="add-top add-bottom">Continue Shopping</div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

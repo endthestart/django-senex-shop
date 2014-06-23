@@ -1,0 +1,25 @@
+{% load url from future %}
+{% load i18n %}
+<div class="sixteen columns progress-container">
+    <div class="progress">
+        <ul class="progress-inner">
+            <li class="step1 {% if step == 1 %}active{% else %}{% if step == 2 %}previous
+                {% else %}{% if step > 1 %}visited{% else %}disabled{% endif %}{% endif %}{% endif %} span3">
+                {% if step == 2 or step == 3 or step == 4 %}<a href="{% url 'checkout_shipping_address' %}">
+                    <i class="visible-phone icon-chevron-left"></i> <span>{% trans "1. Shipping" %}</span></a>
+                    {% else %}<span class="navbar-text">{% trans "1. Shipping" %}</span>{% endif %}</li>
+            <li class="step2 {% if step == 2 %}active{% else %}{% if step == 3 %}previous
+                {% else %}{% if step > 2 %}visited{% else %}disabled{% endif %}{% endif %}{% endif %} span3">
+                {% if step == 3 or step == 4 %}<a href="{% url 'checkout_payment_details' %}">
+                    <i class="visible-phone icon-chevron-left"></i> <span>{% trans "2. Payment" %}</span></a>
+                    {% else %}<span class="navbar-text">{% trans "2. Payment Info" %}</span>{% endif %}</li>
+            <li class="step3 {% if step == 3 %}active{% else %}{% if step == 4 %}previous
+                {% else %}{% if step > 3 %}visited{% else %}disabled{% endif %}{% endif %}{% endif %} span3">
+                {% if step == 4 %}<a href="{% url 'checkout_preview' %}">
+                    <i class="visible-phone icon-chevron-left"></i> <span>{% trans "3. Review" %}</span></a>{% else %}
+                    <span class="navbar-text">{% trans "3. Review Order" %}{% endif %}</span></li>
+            <li class="step4 {% if step == 4 %}active{% else %}disabled{% endif %} span3"><span
+                    class="navbar-text">{% trans "4. Confirmation" %}</span></li>
+        </ul>
+    </div>
+</div>

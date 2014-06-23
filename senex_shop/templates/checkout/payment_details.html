@@ -1,0 +1,95 @@
+{% extends 'checkout/checkout.html' %}
+{% load i18n %}
+{% load currency_filters %}
+{% load static from staticfiles %}
+
+{% block title %}{% trans "Payment Info" %}{% endblock %}
+
+{% block checkout_progress %}
+    {% include 'checkout/progress.html' with step=2 %}
+{% endblock %}
+
+{% block page_title %}{% trans "Payment Info" %}{% endblock page_title %}
+
+{% block shipping_address %}{% endblock shipping_address %}
+{% block order_contents %}{% endblock order_contents %}
+
+{% block payment_details %}
+    <form action="{% url 'checkout_preview' %}" method="POST" id="payment-form">{% csrf_token %}
+        <span class=payment-errors"></span>
+
+        <div class="control-group">
+            <label class="control-label"><span>Card Number</span></label>
+
+            <div class="controls">
+                <input type="text" size="20" data-stripe="number"/>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><span>Security Code</span></label>
+
+            <div class="controls">
+                <input class="cc-security-code" type="text" size="4" data-strive="cvc"/>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label"><span>Expiration Date</span></label>
+
+            <div class="controls">
+                <select class="cc-form-month" data-stripe="exp-month">
+                    <option value="month">Month</option>
+                    {% for month in months %}
+                        <option value="{{ month.value }}">{{ month.display }}</option>
+                    {% endfor %}
+                </select>
+                <select class="cc-form-year" data-stripe="exp-year">
+                    <option value="year">Year</option>
+                    {% for year in years %}
+                        <option value="{{ year }}">{{ year }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <div class="payment-form-bottom">
+            <button type="submit">Preview Order</button>
+        </div>
+    </form>
+    <script type="text/javascript" src="https://js.stripe.com/v2/"></script>
+    <script type="text/javascript">
+        // This identifies your website in the createToken call below
+        Stripe.setPublishableKey('{{ STRIPE_PUBLIC_KEY }}');
+
+        $(function ($) {
+            $('#payment-form').submit(function (event) {
+                var $form = $(this);
+
+                // Disable the submit button to prevent repeated clicks
+                $form.find('button').prop('disabled', true);
+
+                Stripe.card.createToken($form, stripeResponseHandler);
+
+                // Prevent the form from submitting with the default action
+                event.preventDefault()
+            });
+        });
+
+        var stripeResponseHandler = function (status, response) {
+            var $form = $('#payment-form');
+
+            if (response.error) {
+                // Show the errors on the form
+                $form.find('.payment-errors').text(response.error.message);
+                $form.find('button').prop('disabled', false);
+            } else {
+                // token contains id, last4, and card type
+                var token = response.id;
+                // Insert the token into the form so it gets submitted to the server
+                $form.append($('<input type="hidden" name="stripeToken" />').val(token));
+                // and submit
+                $form.get(0).submit();
+            }
+        };
+    </script>
+{% endblock payment_details %}

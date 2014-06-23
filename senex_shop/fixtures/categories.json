@@ -1,0 +1,53 @@
+[
+    {
+        "pk": 1,
+        "model": "senex_shop.category",
+        "fields": {
+            "name": "Bikes",
+            "parent": null,
+            "ordering": 0,
+            "image": "category/senex_logo.png",
+            "is_active": true,
+            "related_categories": [],
+            "meta": "",
+            "name_path": "Bikes",
+            "path": "bikes",
+            "slug": "bikes",
+            "description": ""
+        }
+    },
+    {
+        "pk": 2,
+        "model": "senex_shop.category",
+        "fields": {
+            "name": "Mountain",
+            "parent": 1,
+            "ordering": 0,
+            "image": "category/mountain_bike.jpg",
+            "is_active": true,
+            "related_categories": [3],
+            "meta": "",
+            "name_path": "Bikes > Mountain",
+            "path": "bikes/mountain",
+            "slug": "mountain",
+            "description": "Mountain bikes from Senex!"
+        }
+    },
+    {
+        "pk": 3,
+        "model": "senex_shop.category",
+        "fields": {
+            "name": "Road",
+            "parent": 1,
+            "ordering": 0,
+            "image": "category/road_bike.jpg",
+            "is_active": true,
+            "related_categories": [2],
+            "meta": "",
+            "name_path": "Bikes > Road",
+            "path": "bikes/road",
+            "slug": "road",
+            "description": "Road bikes from Senex!"
+        }
+    }
+]
