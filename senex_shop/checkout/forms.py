@@ -2,6 +2,8 @@ from datetime import date, datetime
 from calendar import monthrange
 
 from django import forms
+from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.dates import MONTHS
 from django.utils.translation import ugettext_lazy as _
@@ -9,7 +11,6 @@ from django.utils.translation import ugettext_lazy as _
 from senex_shop.contact.forms import AbstractAddressForm
 from senex_shop.contact.models import ShippingAddress, UserAddress
 from senex_shop.contact.utils import normalize_email
-from custom_auth.models import User
 
 from localflavor.us.us_states import STATE_CHOICES
 from localflavor.us.forms import USStateSelect, USZipCodeField
@@ -57,7 +58,7 @@ class GatewayForm(AuthenticationForm):
                 del self.errors['password']
             if 'username' in self.cleaned_data:
                 email = normalize_email(self.cleaned_data['username'])
-                if User.objects.filter(email=email).exists():
+                if get_user_model().objects.filter(email=email).exists():
                     msg = "A user with that email already exists"
                     self._errors["username"] = self.error_class([msg])
             return self.cleaned_data
