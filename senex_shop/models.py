@@ -8,7 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from easy_thumbnails.fields import ThumbnailerImageField
 
-from .utils import active_product_types
+from . import active_product_types
 
 dimension_units = (('cm', 'cm'), ('mm', 'mm'), ('in', 'in'))
 

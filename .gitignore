@@ -4,4 +4,5 @@
 *develop-eggs/
 *.egg-info/
 *eggs/
+*dist/
 .idea/
