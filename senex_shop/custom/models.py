@@ -1,5 +1,3 @@
-import newrelic.agent
-
 from django.db import models
 from senex_shop.models import Product, OptionGroup
 from django.utils.translation import ugettext_lazy as _

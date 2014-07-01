@@ -1,5 +1,4 @@
 # from decimal import Decimal
-import newrelic.agent
 
 from django.db import models
 from django.template.defaultfilters import slugify
@@ -312,7 +311,6 @@ class Product(models.Model):
 
     get_subtypes.short_description = _("product subtypes")
 
-    @newrelic.agent.function_trace()
     def add_template_context(self, context, *args, **kwargs):
         subtypes = self.get_subtypes()
         for subtype_name in subtypes:
