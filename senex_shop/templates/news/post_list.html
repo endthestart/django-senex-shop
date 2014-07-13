@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block content %}
+    {% if post_list %}
+        {% for post in post_list %}
+            <div class="post">
+                <p class="post_title">{{ post.title }}</p>
+
+                <p class="post_metadata">BY {{ post.author.first_name|upper }} {{ post.author.last_name|upper }} | PUBLISHED {{
+                    post.publish|date|upper }}.</p>
+                {% if post.photo %}<p class="post_photo"><img src="{{ post.photo.url }}"/></p>{% endif %}
+                <p class="post_body">{{ post.body }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+{% if is_paginated %}
+    <p class="pagination">
+        {% if has_next %}
+            <a class="older" href="?page={{ next }}" title="View older posts">Older</a>
+        {% endif %}
+        {% if has_next and has_previous %} | {% endif %}
+        {% if has_previous %}
+            <a class="newer" href="?page={{ previous }}" title="View newer posts">Newer</a>
+        {% endif %}
+    </p>
+{% endif %}
+{% endblock %}

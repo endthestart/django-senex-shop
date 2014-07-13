@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="post">
+        <p class="post_title">{{ post.title }}</p>
+
+        <p class="post_metadata">BY {{ post.author.first_name|upper }} {{ post.author.last_name|upper }} | PUBLISHED {{
+            post.publish|date|upper }}.</p>
+        {% if post.photo %}<p class="post_photo"><img src="{{ post.photo.url }}"/></p>{% endif %}
+        <p class="post_body">{{ post.body }}</p>
+    </div>
+{% endblock %}
