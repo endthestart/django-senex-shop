@@ -1,4 +1,7 @@
 -- 0.1.2
+-- Add news app
+
+-- 0.1.2
 -- Remove new relic specific code
 
 -- 0.1.1
