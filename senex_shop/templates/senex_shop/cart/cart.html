@@ -62,6 +62,14 @@
 
                 <p>*Taxes and shipping charges may apply.</p>
             </div>
+
+            <form action="" method="post" class="discount-form">
+            {% csrf_token %}
+            <div class="discount-box">
+                <input type="text" name="discount_code" placeholder="Discount Code" />
+                <input class="button button-discount" type="submit" value="Go" />
+            </div>
+            </form>
             <a href="{% url 'checkout_start' %}" class="button button-checkout">{% trans "Checkout" %}</a>
         </div>
     </div>

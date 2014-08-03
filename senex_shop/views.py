@@ -10,12 +10,12 @@ def find_product_template(product, product_types=None):
     if product_types is None:
         product_types = product.get_subtypes()
 
-    templates = ["store/detail_%s.html" % x.lower() for x in product_types]
-    templates.append('store/product.html')
+    templates = ["senex_shop/detail_%s.html" % x.lower() for x in product_types]
+    templates.append('senex_shop/product.html')
     return templates[0]
 
 
-def store_home(request, template_name="category.html"):
+def store_home(request, template_name="senex_shop/category.html"):
     categories = Category.objects.filter(parent=None)
     context = {
         'child_categories': categories
@@ -23,7 +23,7 @@ def store_home(request, template_name="category.html"):
     return render_to_response(template_name, context, RequestContext(request))
 
 
-def category(request, path=None, template_name="category.html"):
+def category(request, path=None, template_name="senex_shop/category.html"):
     category = get_object_or_404(Category, path=path)
     child_categories = Category.objects.filter(parent=category)
     products = Product.objects.filter(category=category)
@@ -36,7 +36,7 @@ def category(request, path=None, template_name="category.html"):
     return render_to_response(template_name, context, RequestContext(request))
 
 
-def product_detail(request, path=None, slug=None, selected_options=(), template_name="store/product.html"):
+def product_detail(request, path=None, slug=None, selected_options=(), template_name="senex_shop/product.html"):
     #errors = [m for m in get_messages(request) if m.level == constants.ERROR]
     product = get_object_or_404(Product, active=True, slug=slug)
 

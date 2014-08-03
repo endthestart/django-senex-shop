@@ -1,4 +1,4 @@
-{% extends 'checkout/checkout.html' %}
+{% extends 'senex_store/checkout/checkout.html' %}
 {% load i18n %}
 {% load currency_filters %}
 {% load static from staticfiles %}
@@ -6,7 +6,7 @@
 {% block title %}{% trans "Payment Info" %}{% endblock %}
 
 {% block checkout_progress %}
-    {% include 'checkout/progress.html' with step=2 %}
+    {% include 'senex_store/checkout/progress.html' with step=2 %}
 {% endblock %}
 
 {% block page_title %}{% trans "Payment Info" %}{% endblock page_title %}

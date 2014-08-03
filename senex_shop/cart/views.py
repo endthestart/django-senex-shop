@@ -1,9 +1,12 @@
 from decimal import Decimal
 
+from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 
+from senex_shop.discounts.forms import DiscountForm
+from senex_shop.discounts.models import Discount
 from senex_shop.models import Product, OptionManager
 from .models import CartItem
 
@@ -52,19 +55,34 @@ def set_quantity(request, next='cart'):
         cart_item.delete()
     else:
         #TODO: Add a check for stock levels
+        #TODO: Add backorder checkbox for products
         cart_item.quantity = quantity
         cart_item.save()
 
     return redirect(next)
 
 
-def cart(request, template_name="store/cart.html"):
+def cart(request, template_name="senex_shop/cart/cart.html"):
+    if request.method == "POST":
+        form = DiscountForm(request.POST)
+        if form.is_valid():
+            try:
+                discount_code = form.cleaned_data['discount_code']
+                discount = Discount.objects.get(code=discount_code)
+                request.cart.discount = discount
+                request.cart.save()
+            except Discount.DoesNotExist:
+                messages.error("Sorry, there was a problem matching the discount code.")
+    else:
+        form = DiscountForm()
+
     if request.cart.num_items > 0:
         cart_items = request.cart.cartitem_set.all()
     else:
         cart_items = None
 
     context = {
+        'form': form,
         'cart': request.cart,
         'cart_items': cart_items,
     }

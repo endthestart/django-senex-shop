@@ -21,7 +21,7 @@ import stripe
 
 
 class GatewayView(CheckoutSessionMixin, FormView):
-    template_name = 'checkout/gateway.html'
+    template_name = 'senex_shop/checkout/gateway.html'
     form_class = GatewayForm
     success_url = reverse_lazy('checkout_shipping_address')
 
@@ -71,7 +71,7 @@ class ShippingAddressView(CheckoutSessionMixin, FormView):
     """
     Determine the shipping for the order.
     """
-    template_name = 'checkout/shipping_address.html'
+    template_name = 'senex_shop/checkout/shipping_address.html'
     form_class = ShippingAddressForm
 
     def get(self, request, *args, **kwargs):
@@ -141,7 +141,7 @@ class UserAddressUpdateView(CheckoutSessionMixin, UpdateView):
     """
     Update a UserAddress
     """
-    template_name = 'checkout/user_address_form.html'
+    template_name = 'senex_shop/checkout/user_address_form.html'
     form_class = UserAddressForm
 
     def get_queryset(self):
@@ -161,7 +161,7 @@ class UserAddressDeleteView(CheckoutSessionMixin, DeleteView):
     """
     Delete an address
     """
-    template_name = 'checkout/user_address_delete.html'
+    template_name = 'senex_shop/checkout/user_address_delete.html'
 
     def get_queryset(self):
         return self.request.user.addresses.all()
@@ -172,7 +172,7 @@ class UserAddressDeleteView(CheckoutSessionMixin, DeleteView):
 
 
 class ShippingMethodView(CheckoutSessionMixin, TemplateView):
-    template_name = 'checkout/shipping_methods.html'
+    template_name = 'senex_shop/checkout/shipping_methods.html'
 
     def get(self, request, *args, **kwargs):
         if request.cart.is_empty:
@@ -260,8 +260,8 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
     1. Build the submission. Cart, shipping_address, shipping_method, total, and user.
     2. Build checkout form,
     """
-    template_name = 'checkout/payment_details.html'
-    template_name_preview = 'checkout/preview.html'
+    template_name = 'senex_shop/checkout/payment_details.html'
+    template_name_preview = 'senex_shop/checkout/preview.html'
     preview = False
     stripe_public_key = settings.STRIPE_PUBLIC_KEY
     stripe_secret_key = settings.STRIPE_SECRET_KEY
@@ -419,7 +419,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
 
 
 class ThankYouView(DetailView):
-    template_name = 'checkout/thank_you.html'
+    template_name = 'senex_shop/checkout/thank_you.html'
     context_object_name = 'order'
 
     def get_object(self):

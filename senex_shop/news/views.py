@@ -5,7 +5,7 @@ from django.views.generic.list import ListView
 from models import Post, Category
 
 
-def post_detail(request, slug, year, month, day, template_name='news/post_detail.html'):
+def post_detail(request, slug, year, month, day, template_name='senex_shop/news/post_detail.html'):
     post = get_object_or_404(Post, slug=slug)
     categories = Category.objects.all()
     context = {
@@ -17,7 +17,7 @@ def post_detail(request, slug, year, month, day, template_name='news/post_detail
 
 class PostListView(ListView):
     model = Post
-    template_name = 'news/post_list.html'
+    template_name = 'senex_shop/news/post_list.html'
     context_object_name = 'post_list'
     paginate_by = 10
 

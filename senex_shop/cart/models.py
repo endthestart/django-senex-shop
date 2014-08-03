@@ -6,6 +6,7 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
 from senex_shop.models import Product
+from senex_shop.discounts.models import Discount
 from .managers import CartManager, OpenCartManager
 
 USER_MODULE_PATH = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -52,6 +53,12 @@ class Cart(models.Model):
         blank=True,
         help_text=_("The date the cart was submitted."),
     )
+    discount = models.ForeignKey(
+        Discount,
+        verbose_name=_("discount"),
+        blank=True,
+        null=True,
+    )
 
     editable_statuses = (OPEN, SAVED)
 
@@ -66,7 +73,6 @@ class Cart(models.Model):
         for item in self.cartitem_set.all():
             item_count += item.quantity
         return item_count
-
     num_items = property(_get_count)
 
     def _get_total(self):
@@ -74,8 +80,15 @@ class Cart(models.Model):
         for item in self.cartitem_set.all():
             total += item.line_total
         return total
-
     total_price = property(_get_total)
+
+    def _get_total_less_discount(self):
+        return self._get_total() - self._get_discount()
+    total_less_discount = property(_get_total_less_discount)
+
+    def _get_discount(self):
+        return self.discount.get_discount(self)
+    discount_amount = property(_get_discount)
 
     def add_item(self, chosen_item, number_added, details=[]):
         already_in_cart = False

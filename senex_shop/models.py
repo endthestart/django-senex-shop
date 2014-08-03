@@ -200,10 +200,8 @@ class Product(models.Model):
         blank=True,
         help_text=_("The cost of the item."),
     )
-    stock = models.DecimalField(
+    stock = models.IntegerField(
         _("stock"),
-        max_digits=18,
-        decimal_places=6,
         default='0',
     )
     short_description = models.TextField(
@@ -255,9 +253,7 @@ class Product(models.Model):
             except IndexError:
                 #TODO: Remove this code when updating images
                 import sys
-
                 print >> sys.stderr, 'Warning: default product image not found'
-
         return img
 
     main_image = property(_get_main_image)

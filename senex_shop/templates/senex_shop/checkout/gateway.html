@@ -7,7 +7,7 @@
 {% endblock %}
 
 {% block checkout_nav %}
-    {% include 'checkout/progress.html' with step=0 %}
+    {% include 'senex_shop/checkout/progress.html' with step=0 %}
 {% endblock %}
 
 {% block checkout_title %}{% trans "Who are you?" %}{% endblock %}
@@ -21,7 +21,7 @@
                 {% csrf_token %}
                 {{ form.non_field_errors }}
                 <h4 class="bright-text">What is your email address?</h4>
-                {% include "partials/form_field.html" with field=form.username %}
+                {% include "senex_shop/partials/form_field.html" with field=form.username %}
                 <h4 class="bright-text">Do you have an account?</h4>
 
                 <div class="control-group">
@@ -38,7 +38,7 @@
                             {{ form.options.2 }}
                             <div class="form-inline">
                                 {{ form.password }}
-                                <small><a href="password-reset.html" tabindex="-1"
+                                <small><a href="{% url 'auth_password_reset' %}" tabindex="-1"
                                           class="bright-text">{% trans "Get a password reminder" %}</a></small>
                                 {% for error in form.password.errors %}
                                     <span class="help-block">{{ error }}</span>
