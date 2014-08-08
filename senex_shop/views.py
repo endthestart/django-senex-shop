@@ -59,3 +59,12 @@ def product_detail(request, path=None, slug=None, selected_options=(), template_
     template_name = find_product_template(product, product_types=subtype_names)
 
     return render_to_response(template_name, context, RequestContext(request))
+
+
+def email_check(request):
+
+    context = {
+        'billing_name': "Billing Name",
+    }
+
+    return render_to_response('senex_shop/email/order_confirmation.html', context, RequestContext(request))

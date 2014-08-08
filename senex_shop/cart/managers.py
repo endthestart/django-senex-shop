@@ -1,4 +1,5 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class CartManager(models.Manager):
@@ -9,7 +10,8 @@ class CartManager(models.Manager):
         if 'cart' in request.session:
             try:
                 session_cart = self.get(pk=request.session['cart'], status=self.status_filter)
-            except Cart.DoesNotExist:
+            except ObjectDoesNotExist:
+                # TODO: This should be Cart.DoesNotExist but doesn't work
                 session_cart = None
 
         if request.user.is_authenticated():

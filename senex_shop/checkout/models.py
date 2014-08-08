@@ -10,50 +10,23 @@ from django.conf import settings
 USER_MODULE_PATH = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
 
 
-class Sale(models.Model):
-    def __init__(self, *args, **kwargs):
-        super(Sale, self).__init__(*args, **kwargs)
-
-        import stripe
-
-        stripe.api_key = settings.STRIPE_SECRET_KEY
-
-        self.stripe = stripe
-
+class StripeCharge(models.Model):
     charge_id = models.CharField(max_length=32)
+    card_brand = models.CharField(max_length=32)
+    last4 = models.CharField(max_length=4)
 
-    def charge(self, price_in_cents, number, exp_month, exp_year, cvc):
-        """
-        Takes a price and credit card details: number, exp_month, exp_year, and cvc.
+    def from_charge(self, charge):
+        self.charge_id = charge.id
+        self.card_brand = charge.card.brand
+        self.last4 = charge.card.last4
 
-        Returns a tuple: (Boolean, Class) Where:
-        The boolean is if the charge was successful.
-        The Class is the response (or error) instance.
-        """
+    def __unicode__(self):
+        return u"Stripe Charge: {}".format(self.charge_id)
 
-        if self.charge_id:
-            return False, Exception(message="This has already been charged.")
-
-        try:
-            response = self.stripe.Charge.create(
-                amount=price_in_cents,
-                currency="usd",
-                card={
-                    "number": number,
-                    "exp_month": exp_month,
-                    "exp_year": exp_year,
-                    "cvc": cvc,
-                },
-                description='Thank you for your purchase!'
-            )
-
-            self.charge_id = response.id
-
-        except self.stripe.CardError, ce:
-            # charge failed
-            return False, ce
-
-        return True, response
+    class Meta:
+        verbose_name = _("stripe charge")
+        verbose_name_plural = _("stripe charges")
+        ordering = ('charge_id',)
 
 
 class Order(models.Model):
@@ -103,7 +76,7 @@ class Order(models.Model):
         ShippingAddress,
         null=True,
         blank=True,
-        verbose_name=_("shipping address")
+        verbose_name=_("shipping address"),
     )
     shipping_method = models.CharField(
         _("shipping method"),
@@ -131,6 +104,12 @@ class Order(models.Model):
         auto_now_add=True,
         db_index=True,
     )
+    charge = models.ForeignKey(
+        StripeCharge,
+        null=True,
+        blank=True,
+        verbose_name=_("charge"),
+    )
 
     @property
     def is_anonymous(self):
@@ -146,8 +125,8 @@ class Order(models.Model):
         return u"Order - {} - {}".format(self.user.get_full_name(), self.number)
 
     class Meta:
-        verbose_name = _("User Payment Details")
-        verbose_name_plural = _("User Payment Details")
+        verbose_name = _("order")
+        verbose_name_plural = _("orders")
         ordering = ('user',)
 
 
@@ -162,7 +141,7 @@ class OrderCreator(object):
     """
 
     def place_order(self, cart, total, user=None, shipping_method=None, shipping_address=None,
-                    billing_address=None, order_number=None, status=None, **kwargs):
+                    billing_address=None, order_number=None, charge=None, status=None, **kwargs):
         if cart.is_empty:
             raise ValueError(_("Empty carts cannot be submitted"))
         if not order_number:
@@ -177,17 +156,18 @@ class OrderCreator(object):
             raise ValueError(_("There is already an order with number {}".format(order_number)))
 
         order = self.create_order_model(user, cart, shipping_address, shipping_method, billing_address, total,
-                                        order_number, status, **kwargs)
+                                        order_number, charge, status, **kwargs)
 
         #TODO: Maybe convert a cart into actual order line items
 
         return order
 
     def create_order_model(self, user, cart, shipping_address, shipping_method, billing_address, total, order_number,
-                           status, **extra_order_fields):
+                           charge, status, **extra_order_fields):
         order_data = {
             'cart_id': cart.id,
             'number': order_number,
+            'charge': charge,
             'total_incl_tax': total,
             'total_excl_tax': total,
             'shipping_incl_tax': 0,

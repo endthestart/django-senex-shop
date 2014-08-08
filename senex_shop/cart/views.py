@@ -72,7 +72,7 @@ def cart(request, template_name="senex_shop/cart/cart.html"):
                 request.cart.discount = discount
                 request.cart.save()
             except Discount.DoesNotExist:
-                messages.error("Sorry, there was a problem matching the discount code.")
+                messages.error("There was a problem matching the discount code.")
     else:
         form = DiscountForm()
 

@@ -83,10 +83,14 @@ class Cart(models.Model):
     total_price = property(_get_total)
 
     def _get_total_less_discount(self):
-        return self._get_total() - self._get_discount()
+        if self.discount:
+            return self.total_price - self.discount_amount
+        else:
+            return self.total_price
     total_less_discount = property(_get_total_less_discount)
 
     def _get_discount(self):
+        # TODO: Merge the total_price and total_less_discount (same thing)
         return self.discount.get_discount(self)
     discount_amount = property(_get_discount)
 

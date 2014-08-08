@@ -32,8 +32,8 @@
         field-by-field easily #}
     {% endcomment %}
     {% if field.widget_type == 'CheckboxInput' %}
-        {% include 'senex_store/partials/form_field_checkbox.html' with field=field %}
+        {% include 'senex_shop/partials/form_field_checkbox.html' with field=field %}
     {% else %}
-        {% include 'senex_store/partials/form_field.html' with field=field %}
+        {% include 'senex_shop/partials/form_field.html' with field=field %}
     {% endif %}
 {% endfor %}

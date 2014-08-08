@@ -12,7 +12,7 @@ from django.views.generic import DeleteView, FormView, TemplateView, DetailView,
 
 from .exceptions import UnableToPlaceOrder, PaymentError
 from .forms import GatewayForm, ShippingAddressForm, UserAddressForm
-from .models import Order, OrderNumberGenerator, UserPaymentDetails
+from .models import Order, OrderNumberGenerator, UserPaymentDetails, StripeCharge
 from .mixins import OrderPlacementMixin
 from .session import CheckoutSessionMixin
 from ..contact.models import UserAddress
@@ -184,7 +184,7 @@ class ShippingMethodView(CheckoutSessionMixin, TemplateView):
             return self.get_success_response()
 
         if not self.checkout_session.is_shipping_address_set():
-            messages.error(request, _("Please choose a shipping address"))
+            messages.error(request, _("Please choose a shipping address."))
             return HttpResponseRedirect(reverse('checkout_shipping_address'))
 
         self._methods = self.get_available_shipping_methods()
@@ -298,7 +298,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
             if not shipping_address:
                 messages.error(
                     self.request,
-                    _("Please choose a shipping address.")
+                    _("Please choose a shipping address. 4")
                 )
                 return HttpResponseRedirect(reverse('checkout_shipping_address'))
 
@@ -345,7 +345,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
                       "contact customer services if this problem persists")
 
         try:
-            self.handle_payment(order_number, order_total, **payment_kwargs)
+            charge = self.handle_payment(order_number, order_total, user, **payment_kwargs)
         except PaymentError, e:
             # Unhandled exception - hopefully, you will only ever see this in
             # development.
@@ -354,12 +354,13 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
             #    order_number, e, exc_info=True)
             self.restore_frozen_cart(cart)
             self.preview = False
-            messages.error(self.request, _("There was an error processing your payment. Please try agian."))
+            messages.error(self.request, _("There was an error processing your payment. Please try again."))
             return self.render_to_response(self.get_context_data(error=unicode(e)))
         try:
-            return self.handle_order_placement(order_number, user, cart, shipping_address, shipping_method, order_total,
-                                               **order_kwargs)
-        # except UnableToPlaceOrder, e:
+            stripe_charge = StripeCharge()
+            stripe_charge.from_charge(charge)
+            stripe_charge.save()
+            return self.handle_order_placement(order_number, user, cart, shipping_address, shipping_method, order_total, stripe_charge, **order_kwargs)
         except UnableToPlaceOrder, e:
             # logger.error(
             #    "Order #%s: unhandled exception while taking payment (%s)",
@@ -377,22 +378,65 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
     def restore_frozen_cart(self, cart):
         cart.thaw()
 
-    def handle_payment(self, order_number, total, **kwargs):
+    def handle_payment(self, order_number, total, user, **kwargs):
+        """
+        :param order_number:
+        :param total:
+        :param kwargs:
+        :return:
+        """
         token = self.request.POST.get('stripeToken', None)
         if not token:
             return HttpResponseRedirect(reverse('checkout_payment_details'))
-        email = self.request.POST.get('stripeEmail', None)
+        # email = self.request.POST.get('stripeEmail', None)
+        # TODO: Add a get_email method that does this logic
         stripe.api_key = self.stripe_secret_key
-        #TODO: If user is authenticated, create/retrieve stripe customer and set/update UserPaymentDetails
-        try:
-            charge = stripe.Charge.create(amount=int(self.request.cart.total_price * 100), currency="usd", card=token,
-                                          description=email)
-        except (stripe.CardError, stripe.InvalidRequestError) as e:
-            messages.error(e)
-            self.restore_frozen_cart(self.request.cart)
-            self.preview = False
-            return self.render_to_response(
-                self.get_context_data(error=e.message))
+
+        if user.is_authenticated():
+            full_name = "{} {}".format(user.first_name, user.last_name)
+            try:
+                user_payment_details = UserPaymentDetails.objects.get(user=user)
+            except UserPaymentDetails.DoesNotExist:
+                user_payment_details = None
+
+            if user_payment_details:
+                try:
+                    customer = stripe.Customer.retrieve(user_payment_details.stripe_id)
+                except stripe.InvalidRequestError as e:
+                    customer = stripe.Customer.create(card=token, description=full_name, email=user.email)
+                    user_payment_details.stripe_id = customer.stripe_id
+                    user_payment_details.save()
+            else:
+                customer = stripe.Customer.create(card=token, description=full_name, email=user.email)
+                user_payment_details = UserPaymentDetails(user=user, stripe_id=customer.id)
+                user_payment_details.save()
+
+            try:
+                charge = stripe.Charge.create(
+                    amount=int(self.request.cart.total_less_discount * 100),
+                    currency="usd",
+                    customer=customer.id
+                )
+            except (stripe.CardError, stripe.InvalidRequestError) as e:
+                messages.error(e)
+                self.restore_frozen_cart(self.request.cart)
+                self.preview = False
+                return self.render_to_response(self.get_context_data(error=e.message))
+        else:
+            email = self.checkout_session.get_guest_email()
+            try:
+                charge = stripe.Charge.create(
+                    amount=int(self.request.cart.total_less_discount * 100),
+                    currency="usd",
+                    card=token,
+                    description=email
+                )
+            except (stripe.CardError, stripe.InvalidRequestError) as e:
+                messages.error(e)
+                self.restore_frozen_cart(self.request.cart)
+                self.preview = False
+                return self.render_to_response(self.get_context_data(error=e.message))
+        return charge
 
     def get_context_data(self, **kwargs):
         ctx = self.build_submission(**kwargs)
@@ -408,7 +452,6 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
         for i in range(1, 13):
             months.append(
                 {'value': str(i).zfill(2), 'display': "{} - {}".format(str(i).zfill(2), calendar.month_name[i]), })
-            print(i)
         return months
 
     def get_year_list(self):
@@ -428,6 +471,7 @@ class ThankYouView(DetailView):
             if 'checkout_order_id' in self.request.session:
                 order = Order.objects.get(pk=self.request.session['checkout_order_id'])
             elif self.request.GET.get('order_id', '') != '':
+                # TODO: Make this accessible only by admins
                 order = Order.objects.get(number=self.request.GET.get('order_id'))
             else:
                 raise Http404(_("No order found"))

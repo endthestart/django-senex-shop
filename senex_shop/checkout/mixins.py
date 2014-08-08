@@ -3,24 +3,26 @@ import logging
 from django.core.exceptions import ObjectDoesNotExist
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.http import HttpResponseRedirect
+from django.template.loader import render_to_string
 
-from .models import Cart, OrderCreator
+from .models import Cart, OrderCreator, StripeCharge
 from .session import CheckoutSessionMixin
 from ..contact.models import ShippingAddress, UserAddress, BillingAddress
 
 
 class OrderPlacementMixin(CheckoutSessionMixin):
-    def handle_order_placement(self, order_number, user, cart, shipping_address, shipping_method, total, **kwargs):
-        order = self.place_order(order_number, user, cart, shipping_address, shipping_method, total, **kwargs)
+    def handle_order_placement(self, order_number, user, cart, shipping_address, shipping_method, total, charge, **kwargs):
+        order = self.place_order(order_number, user, cart, shipping_address, shipping_method, total, charge, **kwargs)
         cart.submit()
-        return self.handle_successful_order(order)
+        return self.handle_successful_order(order, charge)
 
-    def place_order(self, order_number, user, cart, shipping_address, shipping_method, total, billing_address=None,
+    def place_order(self, order_number, user, cart, shipping_address, shipping_method, total, charge, billing_address=None,
                     **kwargs):
         shipping_address = self.create_shipping_address(user, shipping_address)
         billing_address = self.create_billing_address(billing_address, shipping_address, **kwargs)
 
-        #TODO: Implement status for orders
+        # TODO: Add charge as a field on Order model
+        # TODO: Implement status for orders
         # if 'status' not in kwargs:
         #     status = self.get_initial_order_status(cart)
         # else
@@ -29,6 +31,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         order = OrderCreator().place_order(
             user=user,
             order_number=order_number,
+            charge=charge,
             cart=cart,
             shipping_address=shipping_address,
             shipping_method=shipping_method,
@@ -39,7 +42,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         )
         return order
 
-    def handle_successful_order(self, order):
+    def handle_successful_order(self, order, charge):
         """
         Handle the status required after an order has been placed.
         """
@@ -101,7 +104,16 @@ class OrderPlacementMixin(CheckoutSessionMixin):
             #TODO: If there is another cart in the session, merge them
 
     def send_confirmation_message(self, order, **kwargs):
-        #TODO: Send an actual email
-        print("The order has been placed! Wooo!")
+        from django.core.mail import EmailMultiAlternatives
+        html_template = 'senex_shop/email/order_confirmation_body.html'
+        text_template = 'senex_shop/email/order_confirmation_body.txt'
+        subject_template = 'senex_shop/email/order_confirmation_subject.txt'
+        context = {'order': order}
+        email_text = render_to_string(text_template, context)
+        email_html = render_to_string(html_template, context)
+        email_subject = render_to_string(subject_template, context)
+        email = EmailMultiAlternatives(email_subject, email_text, 'info@senexcycles.com', [order.user.email])
+        email.attach_alternative(email_html, "text/html")
+        email.send()
 
 

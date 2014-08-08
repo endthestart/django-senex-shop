@@ -39,6 +39,10 @@ class CheckoutSessionData(object):
             del self.request.session[self.SESSION_KEY][namespace][key]
             self.request.session.modified = True
 
+    def _flush_namespace(self, namespace):
+        self.request.session[self.SESSION_KEY][namespace] = {}
+        self.request.session.modified = True
+
     def flush(self):
         """
         Delete session key
@@ -59,11 +63,11 @@ class CheckoutSessionData(object):
     # 3. Ship to an addressbook address (address chosen from list)
 
     def reset_shipping_data(self):
-        self._flush('shipping')
+        self._flush_namespace('shipping')
 
     def ship_to_user_address(self, address):
         """
-        Set existing shipping address id to session an dunset address fields from session.
+        Set existing shipping address id to session and unset address fields from session.
         """
         self.reset_shipping_data()
         self._set('shipping', 'user_address_id', address.id)
