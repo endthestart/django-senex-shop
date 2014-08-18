@@ -1,3 +1,6 @@
+-- 0.1.6
+-- Update 'auth_register' to 'register'
+
 -- 0.1.5
 -- Update checkout process to work with Stripe
 -- Update checkout process to send emails

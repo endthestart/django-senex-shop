@@ -50,7 +50,7 @@ class GatewayView(CheckoutSessionMixin, FormView):
                     _("Create your account and then you will be redirected back to the checkout process.")
                 )
                 self.success_url = "{0}?next={1}&email={2}".format(
-                    reverse('auth_register'),
+                    reverse('register'),
                     urlquote(reverse('checkout_shipping_address')),
                     urlquote(email)
                 )
