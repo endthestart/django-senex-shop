@@ -1,31 +1,65 @@
-{% extends 'base.html' %}
-{% load static from staticfiles %}
-
-{% block title %}{{ product.name }}{% endblock %}
+{% extends "base.html" %}
+{% load url from future %}
+{% load i18n %}
+{% load currency_filters %}
+{% load thumbnail %}
 
 {% block content %}
-    <div class="category-navigation sixteen columns">
-        {% block breadcrumbs %}
-            <a href="{% url 'store_home' %}">Home</a> {% for ancestor in product.category.get_ancestors %} >
-            <a href="{{ ancestor.get_absolute_url }}">{{ ancestor.name }}</a>{% endfor %}
-        {% endblock breadcrumbs %}
-    </div>
-    <div class="sixteen columns"><p>{{ product.name }}: {{ product.description }}</p></div>
-    <div class="sixteen columns">Add some customization stuff here.</div>
+    <form id="product-options-form" class="remove-bottom" action="{% url 'cart_add' %}" method="post">{% csrf_token %}
+        <div class="category-navigation sixteen columns">
+            {% block breadcrumbs %}
+                <a href="{% url 'store_home' %}">Home</a> {% for ancestor in product.category.get_ancestors %} >
+                <a href="{{ ancestor.get_absolute_url }}">{{ ancestor.name }}</a>{% endfor %}
+            {% endblock breadcrumbs %}
+        </div>
+        <div class="twelve columns">
+            <div class="product-configuration">
+                <div>
+                    <img src="
+                            {% if product.main_image.image %}{% thumbnail product.main_image.image 960x200 crop %}{% endif %}"/>
+                </div>
+                <div>
+                    <h2>{% blocktrans with product.name as name %}{{ name }}{% endblocktrans %}</h2>
 
-    <form action="" method="post">{% csrf_token %}
-        <input type="hidden" name="product_id" value="{{ product.pk }}">
-        <input type="hidden" name="product_type" value="{{ product }}">
-        <input type="hidden" name="option_group_id" value="{{ option_group.pk }}"
-        {% for option in option_group.option_set.all %}
-            <label>{{ option.name }}</label>
-            <select name="options[{{ option.pk }}]">
-                <option value="None">--- Select One ---</option>
-                {% for value in option.values.all %}
-                    <option value="{{ value.id }}">{{ value.name }} +{{ value.price_change }}</option>
-                {% endfor %}
-            </select>
-        {% endfor %}
-        <input type="submit" value="Add To Cart"/>
+                    <p>{% autoescape off %}{{ product.description }}{% endautoescape %}</p>
+                </div>
+                {% if error_message %}
+                    <div><p><strong>{{ error_message }}</strong></p></div>
+                {% endif %}
+                <!--{% for option_group in options %}-->
+                    <!--<div class="product-configuration-option">-->
+                        <!--<div class="product-configuration-option-header">-->
+                            <!--<h5 class="product-configuration-option-name">{{ option_group.name }}</h5>-->
+
+                            <!--<p>{{ option_group.description }}</p>-->
+                        <!--</div>-->
+                        <!--<div class="product-configuration-option-selection">-->
+                            <!--<select name="{{ option_group.id }}" id="{{ option_group.id }}"-->
+                                    <!--class="priced product-configuration-select">-->
+                                <!--{% for choice in option_group.option_set.all %}-->
+                                    <!--<option data-price="{{ choice.price_change }}" value="{{ choice.value }}"-->
+                                            <!--{% if choice.selected %}selected="selected"{% endif %}>{{ choice.name }}-->
+                                        <!--{% if choice.price_change %}-->
+                                            <!--{{ choice.price_change|currency }}-->
+                                        <!--{% endif %}-->
+                                    <!--</option>-->
+                                <!--{% endfor %}-->
+                            <!--</select>-->
+                        <!--</div>-->
+                    <!--</div>-->
+                <!--{% endfor %}-->
+                <div>
+                    <input type="hidden" name="product_name" id="product_name" value="{{ product.slug }}"/>
+                    <input type="hidden" size="5" name="quantity" id="quantity" value="1" class="priced"/>
+                </div>
+            </div>
+        </div>
+        <div class="four columns">
+            <div class="product-configuration-sidebar">
+                <h4>Subtotal:</h4>
+                <h5 class="add-bottom">$<span id="price">{{ product.price }}</span></h5>
+                <input type="submit" class="button" name="addcart" value="Add to Cart"/>
+            </div>
+        </div>
     </form>
-{% endblock %}
+{% endblock content %}
