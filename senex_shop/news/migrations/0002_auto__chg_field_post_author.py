@@ -15,7 +15,7 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
 
         # Changing field 'Post.author'
-        db.alter_column(u'news_post', 'author_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['custom_auth.User'], null=True))
+        db.alter_column(u'news_post', 'author_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
 
     models = {
         u'auth.group': {

@@ -18,10 +18,10 @@ class Migration(SchemaMigration):
     def backwards(self, orm):
 
         # Changing field 'Order.user'
-        db.alter_column(u'checkout_order', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['custom_auth.User'], null=True))
+        db.alter_column(u'checkout_order', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
 
         # Changing field 'UserPaymentDetails.user'
-        db.alter_column(u'checkout_userpaymentdetails', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['custom_auth.User'], null=True))
+        db.alter_column(u'checkout_userpaymentdetails', 'user_id', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True))
 
     models = {
         u'auth.group': {

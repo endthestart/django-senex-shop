@@ -21,7 +21,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=200)),
             ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50)),
-            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['custom_auth.User'], null=True, blank=True)),
+            ('author', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
             ('body', self.gf('django.db.models.fields.TextField')()),
             ('tease', self.gf('django.db.models.fields.TextField')(blank=True)),
             ('status', self.gf('django.db.models.fields.IntegerField')(default=2)),
@@ -54,7 +54,7 @@ class Migration(SchemaMigration):
 
 
     models = {
-        u'custom_auth.user': {
+        u'auth.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75', 'db_index': 'True'}),
@@ -74,7 +74,7 @@ class Migration(SchemaMigration):
         },
         u'news.post': {
             'Meta': {'ordering': "('-publish',)", 'object_name': 'Post'},
-            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['custom_auth.User']", 'null': 'True', 'blank': 'True'}),
+            'author': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'}),
             'body': ('django.db.models.fields.TextField', [], {}),
             'categories': ('django.db.models.fields.related.ManyToManyField', [], {'to': u"orm['news.Category']", 'symmetrical': 'False', 'blank': 'True'}),
             'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),

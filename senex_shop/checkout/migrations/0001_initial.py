@@ -20,7 +20,7 @@ class Migration(SchemaMigration):
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('number', self.gf('django.db.models.fields.CharField')(max_length=128, db_index=True)),
             ('cart', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['cart.Cart'], null=True, blank=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['custom_auth.User'], null=True, blank=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
             ('billing_address', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['contact.BillingAddress'], null=True, blank=True)),
             ('total_incl_tax', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2)),
             ('total_excl_tax', self.gf('django.db.models.fields.DecimalField')(max_digits=12, decimal_places=2)),
@@ -55,7 +55,7 @@ class Migration(SchemaMigration):
         # Adding model 'UserPaymentDetails'
         db.create_table(u'checkout_userpaymentdetails', (
             (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['custom_auth.User'], null=True, blank=True)),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['auth.User'], null=True, blank=True)),
             ('stripe_id', self.gf('django.db.models.fields.CharField')(max_length=128, null=True, blank=True)),
         ))
         db.send_create_signal(u'checkout', ['UserPaymentDetails'])
@@ -99,7 +99,7 @@ class Migration(SchemaMigration):
             'description': ('django.db.models.fields.CharField', [], {'max_length': '10', 'null': 'True', 'blank': 'True'}),
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'status': ('django.db.models.fields.CharField', [], {'default': "'Open'", 'max_length': '128'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['custom_auth.User']", 'null': 'True', 'blank': 'True'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
         },
         u'checkout.order': {
             'Meta': {'ordering': "('user',)", 'object_name': 'Order'},
@@ -117,7 +117,7 @@ class Migration(SchemaMigration):
             'status': ('django.db.models.fields.CharField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
             'total_excl_tax': ('django.db.models.fields.DecimalField', [], {'max_digits': '12', 'decimal_places': '2'}),
             'total_incl_tax': ('django.db.models.fields.DecimalField', [], {'max_digits': '12', 'decimal_places': '2'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['custom_auth.User']", 'null': 'True', 'blank': 'True'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
         },
         u'checkout.paymentdetails': {
             'Meta': {'object_name': 'PaymentDetails'},
@@ -141,7 +141,7 @@ class Migration(SchemaMigration):
             'Meta': {'ordering': "('user',)", 'object_name': 'UserPaymentDetails'},
             u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'stripe_id': ('django.db.models.fields.CharField', [], {'max_length': '128', 'null': 'True', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['custom_auth.User']", 'null': 'True', 'blank': 'True'})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['auth.User']", 'null': 'True', 'blank': 'True'})
         },
         u'contact.billingaddress': {
             'Meta': {'object_name': 'BillingAddress'},
@@ -174,7 +174,7 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'custom_auth.user': {
+        u'auth.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75', 'db_index': 'True'}),

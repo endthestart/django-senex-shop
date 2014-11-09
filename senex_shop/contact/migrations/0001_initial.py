@@ -26,7 +26,7 @@ class Migration(SchemaMigration):
         # Adding model 'UserAddress'
         db.create_table(u'contact_useraddress', (
             (u'shippingaddress_ptr', self.gf('django.db.models.fields.related.OneToOneField')(to=orm['contact.ShippingAddress'], unique=True, primary_key=True)),
-            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='addresses', to=orm['custom_auth.User'])),
+            ('user', self.gf('django.db.models.fields.related.ForeignKey')(related_name='addresses', to=orm['auth.User'])),
             ('is_default_shipping', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('is_default_billing', self.gf('django.db.models.fields.BooleanField')(default=False)),
             ('num_orders', self.gf('django.db.models.fields.PositiveIntegerField')(default=0)),
@@ -104,7 +104,7 @@ class Migration(SchemaMigration):
             'is_default_shipping': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'num_orders': ('django.db.models.fields.PositiveIntegerField', [], {'default': '0'}),
             u'shippingaddress_ptr': ('django.db.models.fields.related.OneToOneField', [], {'to': u"orm['contact.ShippingAddress']", 'unique': 'True', 'primary_key': 'True'}),
-            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'addresses'", 'to': u"orm['custom_auth.User']"})
+            'user': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'addresses'", 'to': u"orm['auth.User']"})
         },
         u'contenttypes.contenttype': {
             'Meta': {'ordering': "('name',)", 'unique_together': "(('app_label', 'model'),)", 'object_name': 'ContentType', 'db_table': "'django_content_type'"},
@@ -113,7 +113,7 @@ class Migration(SchemaMigration):
             'model': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '100'})
         },
-        u'custom_auth.user': {
+        u'auth.user': {
             'Meta': {'object_name': 'User'},
             'date_joined': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now'}),
             'email': ('django.db.models.fields.EmailField', [], {'unique': 'True', 'max_length': '75', 'db_index': 'True'}),
