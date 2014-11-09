@@ -372,6 +372,13 @@ class OptionGroup(models.Model):
         max_length=50,
         help_text=_("The name of the option group."),
     )
+    display = models.CharField(
+        _("display"),
+        max_length=50,
+        default='',
+        blank=True,
+        help_text=_("The display name of the option group."),
+    )
     description = models.TextField(
         _("description"),
         null=True,
