@@ -122,7 +122,11 @@ class Order(models.Model):
         return self.user.email
 
     def __unicode__(self):
-        return u"Order - {} - {}".format(self.user.get_full_name(), self.number)
+        if self.is_anonymous:
+            name = self.guest_email
+        else:
+            name = self.user.get_full_name()
+        return u"Order - {} - {}".format(name, self.number)
 
     class Meta:
         verbose_name = _("order")
