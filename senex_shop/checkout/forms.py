@@ -3,7 +3,6 @@ from calendar import monthrange
 
 from django import forms
 from django.conf import settings
-from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
 from django.utils.dates import MONTHS
 from django.utils.translation import ugettext_lazy as _
@@ -58,7 +57,7 @@ class GatewayForm(AuthenticationForm):
                 del self.errors['password']
             if 'username' in self.cleaned_data:
                 email = normalize_email(self.cleaned_data['username'])
-                if get_user_model().objects.filter(email=email).exists():
+                if settings.AUTH_USER_MODEL.objects.filter(email=email).exists():
                     msg = "A user with that email already exists"
                     self._errors["username"] = self.error_class([msg])
             return self.cleaned_data

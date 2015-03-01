@@ -96,32 +96,16 @@ class Cart(models.Model):
 
     def add_item(self, chosen_item, number_added, details=[]):
         already_in_cart = False
-        item_to_modify = CartItem(cart=self, product=chosen_item, quantity=Decimal('0'))
-        if 'CustomProduct' not in chosen_item.get_subtypes():
-            for similar_item in self.cartitem_set.filter(product__id=chosen_item.id):
-                looks_the_same = len(details) == similar_item.details.count()
-                if looks_the_same:
-                    for detail in details:
-                        try:
-                            similar_item.details.get(
-                                name=detail['name'],
-                                value=unicode(detail['value']),
-                                price_change=detail['price_change']
-                            )
-                        except CartItemDetails.DoesNotExist:
-                            looks_the_same = False
-                if looks_the_same:
-                    item_to_modify = similar_item
-                    already_in_cart = True
-                    break
+        try:
+            item_to_modify = self.cartitem_set.filter(product__id=chosen_item.id)
+            already_in_cart = True
+        except CartItemDetails.DoesNotExist:
+            item_to_modify = CartItem(cart=self, product=chosen_item, quantity=Decimal('0'))
         if not already_in_cart:
             self.cartitem_set.add(item_to_modify)
 
         item_to_modify.quantity += number_added
         item_to_modify.save()
-        if not already_in_cart:
-            for data in details:
-                item_to_modify.add_detail(data)
 
         return item_to_modify
 

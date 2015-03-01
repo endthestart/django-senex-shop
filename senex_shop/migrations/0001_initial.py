@@ -1,217 +1,152 @@
 # -*- coding: utf-8 -*-
-from south.utils import datetime_utils as datetime
-from south.db import db
-from south.v2 import SchemaMigration
-from django.db import models
+from __future__ import unicode_literals
+
+from django.db import models, migrations
+import easy_thumbnails.fields
 
 
-class Migration(SchemaMigration):
+class Migration(migrations.Migration):
 
-    def forwards(self, orm):
-        # Adding model 'Category'
-        db.create_table(u'senex_shop_category', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=200)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=50, blank=True)),
-            ('parent', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='child', null=True, to=orm['senex_shop.Category'])),
-            ('path', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('name_path', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True)),
-            ('meta', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('ordering', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('is_active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-        ))
-        db.send_create_signal(u'senex_shop', ['Category'])
+    dependencies = [
+    ]
 
-        # Adding M2M table for field related_categories on 'Category'
-        m2m_table_name = db.shorten_name(u'senex_shop_category_related_categories')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('from_category', models.ForeignKey(orm[u'senex_shop.category'], null=False)),
-            ('to_category', models.ForeignKey(orm[u'senex_shop.category'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['from_category_id', 'to_category_id'])
-
-        # Adding model 'Product'
-        db.create_table(u'senex_shop_product', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('slug', self.gf('django.db.models.fields.SlugField')(max_length=255, blank=True)),
-            ('sku', self.gf('django.db.models.fields.CharField')(max_length=255, null=True, blank=True)),
-            ('created', self.gf('django.db.models.fields.DateTimeField')(auto_now_add=True, blank=True)),
-            ('modified', self.gf('django.db.models.fields.DateTimeField')(auto_now=True, blank=True)),
-            ('category', self.gf('django.db.models.fields.related.ForeignKey')(related_name=u'category', to=orm['senex_shop.Category'])),
-            ('ordering', self.gf('django.db.models.fields.IntegerField')(default=0)),
-            ('price', self.gf('django.db.models.fields.DecimalField')(null=True, max_digits=8, decimal_places=2, blank=True)),
-            ('stock', self.gf('django.db.models.fields.DecimalField')(default='0', max_digits=18, decimal_places=6)),
-            ('short_description', self.gf('django.db.models.fields.TextField')(default='', max_length=200, blank=True)),
-            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('meta', self.gf('django.db.models.fields.TextField')(max_length=200, null=True, blank=True)),
-            ('active', self.gf('django.db.models.fields.BooleanField')(default=True)),
-        ))
-        db.send_create_signal(u'senex_shop', ['Product'])
-
-        # Adding model 'ProductImage'
-        db.create_table(u'senex_shop_productimage', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('product', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['senex_shop.Product'])),
-            ('image', self.gf('django.db.models.fields.files.ImageField')(max_length=100, null=True, blank=True)),
-            ('sort', self.gf('django.db.models.fields.IntegerField')(default=0)),
-        ))
-        db.send_create_signal(u'senex_shop', ['ProductImage'])
-
-        # Adding unique constraint on 'ProductImage', fields ['product', 'sort']
-        db.create_unique(u'senex_shop_productimage', ['product_id', 'sort'])
-
-        # Adding model 'OptionGroup'
-        db.create_table(u'senex_shop_optiongroup', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('description', self.gf('django.db.models.fields.TextField')(null=True, blank=True)),
-            ('ordering', self.gf('django.db.models.fields.IntegerField')(default=0)),
-        ))
-        db.send_create_signal(u'senex_shop', ['OptionGroup'])
-
-        # Adding model 'Option'
-        db.create_table(u'senex_shop_option', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('option_group', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['senex_shop.OptionGroup'])),
-            ('name', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('value', self.gf('django.db.models.fields.CharField')(max_length=50)),
-            ('price_change', self.gf('django.db.models.fields.DecimalField')(default=0.0, max_digits=8, decimal_places=2)),
-            ('ordering', self.gf('django.db.models.fields.IntegerField')(default=0)),
-        ))
-        db.send_create_signal(u'senex_shop', ['Option'])
-
-        # Adding unique constraint on 'Option', fields ['option_group', 'value']
-        db.create_unique(u'senex_shop_option', ['option_group_id', 'value'])
-
-        # Adding model 'AttributeOption'
-        db.create_table(u'senex_shop_attributeoption', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('description', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('name', self.gf('django.db.models.fields.SlugField')(max_length=100)),
-            ('validation', self.gf('django.db.models.fields.CharField')(max_length=100)),
-            ('sort_order', self.gf('django.db.models.fields.IntegerField')(default=1)),
-            ('error_message', self.gf('django.db.models.fields.CharField')(default=u'invalid entry', max_length=100)),
-        ))
-        db.send_create_signal(u'senex_shop', ['AttributeOption'])
-
-        # Adding model 'ProductAttribute'
-        db.create_table(u'senex_shop_productattribute', (
-            (u'id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('product', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['senex_shop.Product'])),
-            ('option', self.gf('django.db.models.fields.related.ForeignKey')(to=orm['senex_shop.AttributeOption'])),
-            ('value', self.gf('django.db.models.fields.CharField')(max_length=255)),
-        ))
-        db.send_create_signal(u'senex_shop', ['ProductAttribute'])
-
-
-    def backwards(self, orm):
-        # Removing unique constraint on 'Option', fields ['option_group', 'value']
-        db.delete_unique(u'senex_shop_option', ['option_group_id', 'value'])
-
-        # Removing unique constraint on 'ProductImage', fields ['product', 'sort']
-        db.delete_unique(u'senex_shop_productimage', ['product_id', 'sort'])
-
-        # Deleting model 'Category'
-        db.delete_table(u'senex_shop_category')
-
-        # Removing M2M table for field related_categories on 'Category'
-        db.delete_table(db.shorten_name(u'senex_shop_category_related_categories'))
-
-        # Deleting model 'Product'
-        db.delete_table(u'senex_shop_product')
-
-        # Deleting model 'ProductImage'
-        db.delete_table(u'senex_shop_productimage')
-
-        # Deleting model 'OptionGroup'
-        db.delete_table(u'senex_shop_optiongroup')
-
-        # Deleting model 'Option'
-        db.delete_table(u'senex_shop_option')
-
-        # Deleting model 'AttributeOption'
-        db.delete_table(u'senex_shop_attributeoption')
-
-        # Deleting model 'ProductAttribute'
-        db.delete_table(u'senex_shop_productattribute')
-
-
-    models = {
-        u'senex_shop.attributeoption': {
-            'Meta': {'ordering': "('sort_order',)", 'object_name': 'AttributeOption'},
-            'description': ('django.db.models.fields.CharField', [], {'max_length': '100'}),
-            'error_message': ('django.db.models.fields.CharField', [], {'default': "u'invalid entry'", 'max_length': '100'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.SlugField', [], {'max_length': '100'}),
-            'sort_order': ('django.db.models.fields.IntegerField', [], {'default': '1'}),
-            'validation': ('django.db.models.fields.CharField', [], {'max_length': '100'})
-        },
-        u'senex_shop.category': {
-            'Meta': {'object_name': 'Category'},
-            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'is_active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'meta': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '200'}),
-            'name_path': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'ordering': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'parent': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'child'", 'null': 'True', 'to': u"orm['senex_shop.Category']"}),
-            'path': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'related_categories': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'related_categories_rel_+'", 'null': 'True', 'to': u"orm['senex_shop.Category']"}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '50', 'blank': 'True'})
-        },
-        u'senex_shop.option': {
-            'Meta': {'ordering': "('option_group', 'ordering')", 'unique_together': "(('option_group', 'value'),)", 'object_name': 'Option'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'option_group': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['senex_shop.OptionGroup']"}),
-            'ordering': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'price_change': ('django.db.models.fields.DecimalField', [], {'default': '0.0', 'max_digits': '8', 'decimal_places': '2'}),
-            'value': ('django.db.models.fields.CharField', [], {'max_length': '50'})
-        },
-        u'senex_shop.optiongroup': {
-            'Meta': {'ordering': "('ordering',)", 'object_name': 'OptionGroup'},
-            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '50'}),
-            'ordering': ('django.db.models.fields.IntegerField', [], {'default': '0'})
-        },
-        u'senex_shop.product': {
-            'Meta': {'ordering': "('ordering', 'name')", 'object_name': 'Product'},
-            'active': ('django.db.models.fields.BooleanField', [], {'default': 'True'}),
-            'category': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "u'category'", 'to': u"orm['senex_shop.Category']"}),
-            'created': ('django.db.models.fields.DateTimeField', [], {'auto_now_add': 'True', 'blank': 'True'}),
-            'description': ('django.db.models.fields.TextField', [], {'null': 'True', 'blank': 'True'}),
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'meta': ('django.db.models.fields.TextField', [], {'max_length': '200', 'null': 'True', 'blank': 'True'}),
-            'modified': ('django.db.models.fields.DateTimeField', [], {'auto_now': 'True', 'blank': 'True'}),
-            'name': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'ordering': ('django.db.models.fields.IntegerField', [], {'default': '0'}),
-            'price': ('django.db.models.fields.DecimalField', [], {'null': 'True', 'max_digits': '8', 'decimal_places': '2', 'blank': 'True'}),
-            'short_description': ('django.db.models.fields.TextField', [], {'default': "''", 'max_length': '200', 'blank': 'True'}),
-            'sku': ('django.db.models.fields.CharField', [], {'max_length': '255', 'null': 'True', 'blank': 'True'}),
-            'slug': ('django.db.models.fields.SlugField', [], {'max_length': '255', 'blank': 'True'}),
-            'stock': ('django.db.models.fields.DecimalField', [], {'default': "'0'", 'max_digits': '18', 'decimal_places': '6'})
-        },
-        u'senex_shop.productattribute': {
-            'Meta': {'ordering': "('option__sort_order',)", 'object_name': 'ProductAttribute'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'option': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['senex_shop.AttributeOption']"}),
-            'product': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['senex_shop.Product']"}),
-            'value': ('django.db.models.fields.CharField', [], {'max_length': '255'})
-        },
-        u'senex_shop.productimage': {
-            'Meta': {'ordering': "['sort']", 'unique_together': "(('product', 'sort'),)", 'object_name': 'ProductImage'},
-            u'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
-            'image': ('django.db.models.fields.files.ImageField', [], {'max_length': '100', 'null': 'True', 'blank': 'True'}),
-            'product': ('django.db.models.fields.related.ForeignKey', [], {'to': u"orm['senex_shop.Product']"}),
-            'sort': ('django.db.models.fields.IntegerField', [], {'default': '0'})
-        }
-    }
-
-    complete_apps = ['senex_shop']
+    operations = [
+        migrations.CreateModel(
+            name='AttributeOption',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('description', models.CharField(max_length=100, verbose_name='description')),
+                ('name', models.SlugField(max_length=100, verbose_name='name')),
+                ('validation', models.CharField(max_length=100, verbose_name='validation', choices=[(b'product.utils.validation_simple', 'One or more characters'), (b'product.utils.validation_integer', 'Integer number'), (b'product.utils.validation_yesno', 'Yes or No'), (b'product.utils.validation_decimal', 'Decimal number')])),
+                ('sort_order', models.IntegerField(default=1, verbose_name='sort order')),
+                ('error_message', models.CharField(default='invalid entry', max_length=100, verbose_name='error message')),
+            ],
+            options={
+                'ordering': ('sort_order',),
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Category',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(max_length=200, verbose_name='name')),
+                ('slug', models.SlugField(help_text='Used for URLs, auto-generated from name if blank', verbose_name='slug', blank=True)),
+                ('path', models.CharField(help_text='The path of the category for use in URLs', max_length=255, null=True, verbose_name='path', blank=True)),
+                ('name_path', models.CharField(help_text='The path of the category for use in text', max_length=255, null=True, verbose_name='name path', blank=True)),
+                ('image', easy_thumbnails.fields.ThumbnailerImageField(help_text='The category image used for display.', upload_to=b'category', null=True, verbose_name='image', blank=True)),
+                ('meta', models.TextField(help_text='Meta description for this category.', null=True, verbose_name='meta description', blank=True)),
+                ('description', models.TextField(help_text='Description of the category.', verbose_name='description', blank=True)),
+                ('ordering', models.IntegerField(default=0, help_text='Override alphabetical order in the category display.', verbose_name='ordering')),
+                ('is_active', models.BooleanField(default=True, help_text='Whether or not the category is active.', verbose_name='active')),
+                ('parent', models.ForeignKey(related_name='child', blank=True, to='senex_shop.Category', null=True)),
+                ('related_categories', models.ManyToManyField(related_name='related_categories_rel_+', null=True, verbose_name='related categories', to='senex_shop.Category', blank=True)),
+            ],
+            options={
+                'verbose_name': 'category',
+                'verbose_name_plural': 'categories',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Option',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(help_text='The displayed value of the option.', max_length=50, verbose_name='name')),
+                ('value', models.CharField(help_text='The stored value of the option.', max_length=50, verbose_name='value')),
+                ('price_change', models.DecimalField(default=0.0, help_text='The change in cost for a product.', verbose_name='price change', max_digits=8, decimal_places=2)),
+                ('ordering', models.IntegerField(default=0, help_text='Override alphabetical order in the category display.', verbose_name='ordering')),
+            ],
+            options={
+                'ordering': ('option_group', 'ordering'),
+                'verbose_name': 'option',
+                'verbose_name_plural': 'options',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='OptionGroup',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(help_text='The name of the option group.', max_length=50, verbose_name='name')),
+                ('display', models.CharField(default=b'', help_text='The display name of the option group.', max_length=50, verbose_name='display', blank=True)),
+                ('description', models.TextField(help_text='This should be a more lengthy description of the option group.', null=True, verbose_name='description', blank=True)),
+                ('ordering', models.IntegerField(default=0, help_text='Override alphabetical order in the category display.', verbose_name='ordering')),
+            ],
+            options={
+                'ordering': ('ordering',),
+                'verbose_name': 'option group',
+                'verbose_name_plural': 'option groups',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='Product',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('name', models.CharField(help_text='The name of the product.', max_length=255, null=True, verbose_name='name', blank=True)),
+                ('slug', models.SlugField(help_text='Used for URLs, auto-generated from name if blank.', max_length=255, verbose_name='slug', blank=True)),
+                ('sku', models.CharField(help_text='Defaults to slug if left blank.', max_length=255, null=True, verbose_name='sku', blank=True)),
+                ('created', models.DateTimeField(help_text='The date and time the item was created.', verbose_name='date created', auto_now_add=True)),
+                ('modified', models.DateTimeField(help_text='The date and time the item was modified.', verbose_name='date modified', auto_now=True)),
+                ('ordering', models.IntegerField(default=0, help_text='Override default alphabetical ordering', verbose_name='ordering')),
+                ('price', models.DecimalField(decimal_places=2, max_digits=8, blank=True, help_text='The cost of the item.', null=True, verbose_name='price')),
+                ('stock', models.IntegerField(default=b'0', verbose_name='stock')),
+                ('short_description', models.TextField(default=b'', help_text='This should be a 1 or 2 line description of the product.', max_length=200, verbose_name='short description of the product.', blank=True)),
+                ('description', models.TextField(help_text='This should be a more lengthy description of the product.', null=True, verbose_name='description', blank=True)),
+                ('meta', models.TextField(help_text='The meta description of the product.', max_length=200, null=True, verbose_name='meta description', blank=True)),
+                ('active', models.BooleanField(default=True, help_text='Denotes if the product is available or not.', verbose_name='active')),
+                ('category', models.ForeignKey(related_name='category', to='senex_shop.Category')),
+            ],
+            options={
+                'ordering': ('ordering', 'name'),
+                'verbose_name': 'product',
+                'verbose_name_plural': 'products',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ProductAttribute',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('value', models.CharField(max_length=255, verbose_name='value')),
+                ('option', models.ForeignKey(to='senex_shop.AttributeOption')),
+                ('product', models.ForeignKey(to='senex_shop.Product')),
+            ],
+            options={
+                'ordering': ('option__sort_order',),
+                'verbose_name': 'Product Attribute',
+                'verbose_name_plural': 'Product Attributes',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.CreateModel(
+            name='ProductImage',
+            fields=[
+                ('id', models.AutoField(verbose_name='ID', serialize=False, auto_created=True, primary_key=True)),
+                ('image', easy_thumbnails.fields.ThumbnailerImageField(help_text='The product image used for display.', upload_to=b'product', null=True, verbose_name='image', blank=True)),
+                ('sort', models.IntegerField(default=0, verbose_name='Sort Order')),
+                ('product', models.ForeignKey(to='senex_shop.Product')),
+            ],
+            options={
+                'ordering': ['sort'],
+                'verbose_name': 'product image',
+                'verbose_name_plural': 'product images',
+            },
+            bases=(models.Model,),
+        ),
+        migrations.AlterUniqueTogether(
+            name='productimage',
+            unique_together=set([('product', 'sort')]),
+        ),
+        migrations.AddField(
+            model_name='option',
+            name='option_group',
+            field=models.ForeignKey(to='senex_shop.OptionGroup'),
+            preserve_default=True,
+        ),
+        migrations.AlterUniqueTogether(
+            name='option',
+            unique_together=set([('option_group', 'value')]),
+        ),
+    ]
