@@ -1,3 +1,6 @@
+-- 0.2.1
+-- Fix orders with anonymous users
+
 -- 0.2.0
 -- Upgrade to Django 1.7 compatibility
 
