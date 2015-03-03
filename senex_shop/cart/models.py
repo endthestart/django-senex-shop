@@ -97,9 +97,9 @@ class Cart(models.Model):
     def add_item(self, chosen_item, number_added, details=[]):
         already_in_cart = False
         try:
-            item_to_modify = self.cartitem_set.filter(product__id=chosen_item.id)
+            item_to_modify = self.cartitem_set.get(product__id=chosen_item.id)
             already_in_cart = True
-        except CartItemDetails.DoesNotExist:
+        except CartItem.DoesNotExist:
             item_to_modify = CartItem(cart=self, product=chosen_item, quantity=Decimal('0'))
         if not already_in_cart:
             self.cartitem_set.add(item_to_modify)
