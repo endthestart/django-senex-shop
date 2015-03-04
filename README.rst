@@ -1,6 +1,10 @@
-Requirements
+**Requirements**
 
-Requires a Stripe.js account: Currently senex shop only supports Stripe as a payment backend. As such the setting is permanently required. Once more payment backends are added this will be configurable in the admin.
+Requires a Stripe.js account: Currently Senex Shop only supports Stripe as a payment backend.
+As such the setting is permanently required.
+Once more payment backends are added this will be configurable in the admin.
+
+**Packages**
 
 Add the following to your requirements.txt:
 
@@ -12,20 +16,27 @@ pytz==2014.4
 
 django-senex-shop==0.2.2
 
+**Settings**
+
 Configure your Settings:
 
+``
 MIDDLEWARE_CLASSES = (
     '...',
     'senex_shop.cart.middleware.CartMiddleware',
     '...',
 )
+``
 
+``
 TEMPLATE_CONTEXT_PROCESSORS = (
     '...',
     'senex_shop.core.context_processors.get_default_shop',
     '...',
 )
+``
 
+``
 INSTALLED_APPS = (
     '...',
     'localflavor',
@@ -40,7 +51,7 @@ INSTALLED_APPS = (
     'senex_shop.news',
     'senex_shop.shipping',
 )
-
+``
 
 ########## THUMBNAIL CONFIGURATION
 # See: http://easy-thumbnails.readthedocs.org/en/latest/ref/settings/
@@ -48,26 +59,26 @@ THUMBNAIL_BASEDIR = 'thumbs'
 ########## END THUMBNAIL CONFIGURATION
 
 
-
-
 from os import environ
 
 
 ########## STRIPE CONFIGURATION
 # See: http://django-stripe-payments.readthedocs.org/en/latest/installation.html
-STRIPE_PUBLIC_KEY = environ.get("STRIPE_PUBLIC_KEY", "pk_test_BnKaAmgD81hWGi1F1suzPmX6")
-STRIPE_SECRET_KEY = environ.get("STRIPE_SECRET_KEY", "sk_test_x1CjT9YMoj30rlpg50CnmD8A")
+STRIPE_PUBLIC_KEY = environ.get("STRIPE_PUBLIC_KEY", "pk_test_publickey")
+STRIPE_SECRET_KEY = environ.get("STRIPE_SECRET_KEY", "sk_test_privatekey")
 ########## END STRIPE
 
 
-Run ./manage.py migrate
-Run ./manage.py createsuperuser
-
-
-urls.py
-
+**URLs**
 
 url(r'^checkout/', include('senex_shop.checkout.urls')),
 url(r'^cart/', include('senex_shop.cart.urls')),
 url(r'^shop/', include('senex_shop.urls')),
 url(r'^account/', include('custom_auth.urls')),
+
+**Finally**
+
+Run ./manage.py migrate
+Run ./manage.py createsuperuser
+
+
