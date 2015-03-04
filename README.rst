@@ -6,7 +6,7 @@ Once more payment backends are added this will be configurable in the admin.
 
 **Packages**
 
-Add the following to your requirements.txt:::
+Add the following to your requirements.txt::
 
     Django==1.7.5
     django-braces==1.4.0
@@ -18,7 +18,7 @@ Add the following to your requirements.txt:::
 
 **Settings**
 
-Configure your Settings:::
+Configure your Settings::
 
     MIDDLEWARE_CLASSES = (
         '...',
@@ -66,14 +66,14 @@ Configure your Settings:::
     ########## END STRIPE
 
 
-**URLs**
+**URLs**::
 
     url(r'^checkout/', include('senex_shop.checkout.urls')),
     url(r'^cart/', include('senex_shop.cart.urls')),
     url(r'^shop/', include('senex_shop.urls')),
     url(r'^account/', include('custom_auth.urls')),
 
-**Finally**
+**Finally**::
 
     Run ./manage.py migrate
     Run ./manage.py createsuperuser
