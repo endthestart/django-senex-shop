@@ -1,3 +1,9 @@
+-- 0.2.3
+-- Fix big when starting checkout process
+
+-- 0.2.2
+-- Fix bug when adding items to cart
+
 -- 0.2.1
 -- Fix orders with anonymous users
 
