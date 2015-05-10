@@ -179,6 +179,8 @@ class ShippingMethodView(CheckoutSessionMixin, TemplateView):
             messages.error(request, _("You need to add some items to your cart to checkout."))
             return HttpResponseRedirect(reverse('cart'))
 
+        return self.get_success_response()
+
         if not request.cart.is_shipping_required():
             self.checkout_session.use_shipping_method('__free__')
             return self.get_success_response()
@@ -187,39 +189,20 @@ class ShippingMethodView(CheckoutSessionMixin, TemplateView):
             messages.error(request, _("Please choose a shipping address."))
             return HttpResponseRedirect(reverse('checkout_shipping_address'))
 
-        self._methods = self.get_available_shipping_methods()
-        if len(self._methods) == 0:
-            messages.warning(request, _("Shipping is unavailable for your chosen address - please choose another."))
-            return HttpResponseRedirect(reverse('checkout_shipping_address'))
-        elif len(self._methods) == 1:
-            #self.checkout_session.use_shipping_method(self._methods[0].code)
-            #defaulting to free shipping
-            self.checkout_session.use_free_shipping()
-            return self.get_success_response()
-
         return super(ShippingMethodView, self).get(request, *args, **kwargs)
 
     def get_context_data(self, **kwargs):
         kwargs = super(ShippingMethodView, self).get_context_data(**kwargs)
-        kwargs['methods'] = self._methods
         return kwargs
-
-    def get_available_shipping_methods(self):
-        from senex_shop.shipping import methods
-        #return Repository().get_shipping_methods(
-        #    user=self.request.user,
-        #    cart=self.request.cart,
-        #    shipping_address=self.get_shipping_address(self.request.cart),
-        #    request=self.request
-        #)
-        return (methods.Free(),)
 
     def post(self, request, *args, **kwargs):
         method_code = request.POST.get('method_code', None)
         is_valid = False
-        for method in self.get_available_shipping_methods():
-            if method.code == method.code:
-                is_valid = True
+        # TODO: Fix shipping here
+        # for method in self.get_available_shipping_methods():
+        #     if method.code == method.code:
+        #         is_valid = True
+        is_valid = True
         if not is_valid:
             messages.error(request, _("Your submitted shipping method is not permitted."))
             return HttpResponseRedirect(reverse('checkout_shipping_method'))
@@ -244,9 +227,9 @@ class PaymentMethodView(CheckoutSessionMixin, TemplateView):
             messages.error(request, _("Please choose a shipping address."))
             return HttpResponseRedirect(reverse('checkout_shipping_address'))
 
-        if shipping_required and not self.checkout_session.is_shipping_method_set(self.request.cart):
-            messages.error(request, _("Please choose a shipping method."))
-            return HttpResponseRedirect(reverse('check_shipping_method'))
+        # if shipping_required and not self.checkout_session.is_shipping_method_set(self.request.cart):
+        #     messages.error(request, _("Please choose a shipping method."))
+        #     return HttpResponseRedirect(reverse('checkout_shipping_method'))
 
         return self.get_success_response()
 
@@ -413,7 +396,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
 
             try:
                 charge = stripe.Charge.create(
-                    amount=int(self.request.cart.total_less_discount * 100),
+                    amount=int(self.request.cart.total_price * 100),
                     currency="usd",
                     customer=customer.id
                 )
@@ -426,7 +409,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
             email = self.checkout_session.get_guest_email()
             try:
                 charge = stripe.Charge.create(
-                    amount=int(self.request.cart.total_less_discount * 100),
+                    amount=int(self.request.cart.total_price * 100),
                     currency="usd",
                     card=token,
                     description=email

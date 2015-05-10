@@ -1,3 +1,6 @@
+-- 0.3.0
+-- Add simple shipping calculations
+
 -- 0.2.3
 -- Fix big when starting checkout process
 

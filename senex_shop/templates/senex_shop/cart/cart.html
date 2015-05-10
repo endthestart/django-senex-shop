@@ -58,7 +58,7 @@
             <h5 class="rule add-top add-bottom">{{ cart.num_items }} Item{{ cart.num_items|pluralize }}</h5>
 
             <div class="rule">
-                <h5>Subtotal: {{ cart.total_price|currency }}</h5>
+                <h5>Subtotal: {{ cart.subtotal|currency }}</h5>
 
                 <p>*Taxes and shipping charges may apply.</p>
             </div>

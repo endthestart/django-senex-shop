@@ -5,8 +5,9 @@ from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 
-from senex_shop.models import Product
+from senex_shop.core.models import Shop
 from senex_shop.discounts.models import Discount
+from senex_shop.models import Product
 from .managers import CartManager, OpenCartManager
 
 USER_MODULE_PATH = getattr(settings, 'AUTH_USER_MODEL', 'auth.User')
@@ -72,33 +73,46 @@ class Cart(models.Model):
         return False
 
     def calculate_shipping(self):
+        shop = Shop.objects.get(pk=1)
+        shipping_method = shop.shipping_module
+        return shipping_method.calculate(cart=self)
 
+    @property
+    def weight(self):
+        total_weight = Decimal("0.00")
+        for item in self.cartitem_set.all():
+            if item.product.shipping_type == 'weight':
+                total_weight += item.product.weight
+        return total_weight
 
-    def _get_count(self):
+    @property
+    def num_items(self):
         item_count = 0
         for item in self.cartitem_set.all():
             item_count += item.quantity
         return item_count
-    num_items = property(_get_count)
 
-    def _get_total(self):
-        total = Decimal('0')
+    @property
+    def subtotal(self):
+        total = Decimal('0.00')
         for item in self.cartitem_set.all():
             total += item.line_total
         return total
-    total_price = property(_get_total)
 
-    def _get_total_less_discount(self):
+    @property
+    def total_price(self):
+        total = Decimal('0.00')
+        total += self.calculate_shipping()
+        for item in self.cartitem_set.all():
+            total += item.line_total
         if self.discount:
-            return self.total_price - self.discount_amount
-        else:
-            return self.total_price
-    total_less_discount = property(_get_total_less_discount)
+            total = total - self.discount_amount
 
-    def _get_discount(self):
-        # TODO: Merge the total_price and total_less_discount (same thing)
+        return total
+
+    @property
+    def discount_amount(self):
         return self.discount.get_discount(self)
-    discount_amount = property(_get_discount)
 
     def add_item(self, chosen_item, number_added, details=[]):
         already_in_cart = False
@@ -139,12 +153,11 @@ class Cart(models.Model):
             item.delete()
         self.save()
 
-    def _is_empty(self):
+    @property
+    def is_empty(self):
         if self.num_items > 0:
             return False
         return True
-
-    is_empty = property(_is_empty)
 
     def freeze(self):
         """
