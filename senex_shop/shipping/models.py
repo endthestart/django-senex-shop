@@ -10,26 +10,32 @@ class ShippingMethod(models.Model):
     Fields from shipping.base.ShippingMethod must be added here manually.
     """
     code = models.SlugField(
-        _("slug"),
+        _(u"slug"),
         max_length=128,
         unique=True,
     )
     name = models.CharField(
-        _("name"),
+        _(u"name"),
         max_length=128,
         unique=True,
     )
     description = models.TextField(
-        _("description"),
+        _(u"description"),
         blank=True,
     )
-
-    _cart = None
+    priority = models.IntegerField(
+        _(u"priority"),
+        default=0,
+    )
+    active = models.BooleanField(
+        _(u"active"),
+        default=False,
+    )
 
     class Meta:
         abstract = True
-        verbose_name = _("shipping method")
-        verbose_name_plural = _("shipping methods")
+        verbose_name = _(u"shipping method")
+        verbose_name_plural = _(u"shipping methods")
 
     def save(self, *args, **kwargs):
         if not self.code:
@@ -39,75 +45,56 @@ class ShippingMethod(models.Model):
     def __unicode__(self):
         return self.name
 
-    def set_cart(self, cart):
-        self._cart = cart
-
-
-class OrderAndItemsCharges(ShippingMethod):
-    price_per_order = models.DecimalField(
-        _("price per order"),
-        decimal_places=2,
-        max_digits=12,
-        default=Decimal("0.00"),
-    )
-    price_per_item = models.DecimalField(
-        _("price per item"),
-        decimal_places=2,
-        max_digits=12,
-        default=Decimal("0.00"),
-    )
-
-    free_shipping_threshold = models.DecimalField(
-        _("free shipping"),
-        decimal_places=2,
-        max_digits=12,
-        default=Decimal("0.00"),
-    )
-
-    cart = None
-
-    class Meta:
-        verbose_name = _("order and item charge")
-        verbose_name_plural = _("order and items charges")
-
-    def set_cart(self, cart):
-        self._cart = cart
-
-    @property
-    def charge_incl_tax(self):
-        if self.free_shipping_threshold is not None and self._cart.total_incl_tax >= self.free_shipping_threshold:
-            return Decimal("0.00")
-
-        charge = self.price_per_order
-        for line in self.cart.cartitem_set.all():
-            charge += line.quantity * self.price_per_item
-        return charge
-
-    @property
-    def charge_excl_tax(self):
-        return self.charge_incl_tax
-
-
 class WeightBased(ShippingMethod):
+    weight_attribute = 'weight'
     upper_charge = models.DecimalField(
-        _("upper charge"),
+        _(u"upper charge"),
         decimal_places=2,
         max_digits=12,
         null=True,
-        help_text=_("This is the charge when the weight of the cart is greater than all the weight bands."),
-    )
-    weight_attribute = 'weight'
+        help_text=_(u"This is the charge when the weight of the cart is greater than all the weight bands."),
+        )
     default_weight = models.DecimalField(
-        _("default weight"),
+        _(u"default weight"),
         decimal_places=2,
         max_digits=12,
         default=Decimal("0.00"),
-        help_text=_("Default product weight when no weight attribute is defined.")
+        help_text=_(u"Default product weight when no weight attribute is defined.")
     )
 
     class Meta:
         verbose_name = _("weight-based shipping method")
         verbose_name_plural = _("weight-based shipping methods")
+
+    def calculate(self, cart):
+        weight = cart.weight()
+        charge = self.charge_for_weight(weight)
+
+    def charge_for_weight(self, weight):
+        weight = Decimal(weight)
+        if not self.bands.exists():
+            return Decimal("0.00")
+
+        top_band = self.top_band
+        if weight < top_band.upper_limit:
+            band = self.get_band_for_weight(weight)
+            return band.charge
+        else:
+            return top_band.charge
+
+    @property
+    def top_band(self):
+        try:
+            return self.bands.order_by('-upper_limit')[0]
+        except IndexError:
+            return None
+
+
+    def get_band_for_weight(self, weight):
+        try:
+            return self.bands.filter(upper_limit__gte=weight).order_by('upper_limit')[0]
+        except IndexError:
+            return None
 
     @property
     def charge_incl_tax(self):

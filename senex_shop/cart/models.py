@@ -25,37 +25,37 @@ class Cart(models.Model):
         (SUBMITTED, _("Submitted - has been ordered at the checkout")),
     )
     status = models.CharField(
-        _("status"),
+        _(u"status"),
         max_length=128,
         default=OPEN,
         choices=STATUS_CHOICES,
-        help_text=_("The status of the cart")
+        help_text=_(u"The status of the cart")
     )
     description = models.CharField(
-        _("description"),
+        _(u"description"),
         blank=True,
         null=True,
         max_length=10,
     )
     created = models.DateTimeField(
-        _("created"),
+        _(u"created"),
         auto_now_add=True,
     )
     user = models.ForeignKey(
         USER_MODULE_PATH,
-        verbose_name=_("customer"),
+        verbose_name=_(u"customer"),
         blank=True,
         null=True,
     )
     date_submitted = models.DateTimeField(
-        _("date submitted"),
+        _(u"date submitted"),
         null=True,
         blank=True,
-        help_text=_("The date the cart was submitted."),
+        help_text=_(u"The date the cart was submitted."),
     )
     discount = models.ForeignKey(
         Discount,
-        verbose_name=_("discount"),
+        verbose_name=_(u"discount"),
         blank=True,
         null=True,
     )
@@ -66,7 +66,13 @@ class Cart(models.Model):
     open = OpenCartManager()
 
     def is_shipping_required(self):
-        return True
+        for item in self.cartitem_set.all():
+            if item.product.shipping_required:
+                return True
+        return False
+
+    def calculate_shipping(self):
+
 
     def _get_count(self):
         item_count = 0

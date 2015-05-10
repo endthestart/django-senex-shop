@@ -50,21 +50,21 @@ class CheckoutSessionMixin(object):
                 address.populate_alternative_model(shipping_address)
                 return address
 
-        #def get_shipping_method(self, cart, shipping_address=None, **kwargs):
-        #    """
-        #    Return the selected shipping method instance from this checkout session.
-        #    """
-        #    code = self.checkout_session.shipping_method_code(cart)
-        #    methods = Repository().get_shipping_methods(
-        #        user=self.request.user,
-        #        cart=cart,
-        #        shipping_address=shipping_address,
-        #        request=self.request
-        #    )
-        #    methods = {}
-        #    for method in methods:
-        #        if method.code == code:
-        #            return method
+    def get_shipping_method(self, cart, shipping_address=None, **kwargs):
+       """
+       Return the selected shipping method instance from this checkout session.
+       """
+       code = self.checkout_session.shipping_method_code(cart)
+       methods = Repository().get_shipping_methods(
+           user=self.request.user,
+           cart=cart,
+           shipping_address=shipping_address,
+           request=self.request
+       )
+       methods = {}
+       for method in methods:
+           if method.code == code:
+               return method
 
         #def get_order_totals(self, cart, shipping_method, **kwargs):
         #    """

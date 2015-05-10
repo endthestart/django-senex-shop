@@ -153,83 +153,101 @@ class Product(models.Model):
     A class for items that can be ordered.
     """
     name = models.CharField(
-        _("name"),
+        _(u"name"),
         max_length=255,
         null=True,
         blank=True,
-        help_text=_("The name of the product."),
+        help_text=_(u"The name of the product."),
     )
     slug = models.SlugField(
-        _("slug"),
+        _(u"slug"),
         blank=True,
-        help_text=_("Used for URLs, auto-generated from name if blank."),
+        help_text=_(u"Used for URLs, auto-generated from name if blank."),
         max_length=255,
     )
     sku = models.CharField(
-        _("sku"),
+        _(u"sku"),
         max_length=255,
         blank=True,
         null=True,
-        help_text=_("Defaults to slug if left blank.")
+        help_text=_(u"Defaults to slug if left blank.")
     )
     created = models.DateTimeField(
-        _("date created"),
+        _(u"date created"),
         auto_now_add=True,
-        help_text=_("The date and time the item was created."),
+        help_text=_(u"The date and time the item was created."),
     )
     modified = models.DateTimeField(
-        _("date modified"),
+        _(u"date modified"),
         auto_now=True,
-        help_text=_("The date and time the item was modified."),
+        help_text=_(u"The date and time the item was modified."),
     )
     category = models.ForeignKey(
         Category,
-        related_name=_("category"),
+        related_name=_(u"category"),
     )
     ordering = models.IntegerField(
-        _("ordering"),
+        _(u"ordering"),
         default=0,
-        help_text=_("Override default alphabetical ordering"),
+        help_text=_(u"Override default alphabetical ordering"),
     )
     price = models.DecimalField(
-        _("price"),
+        _(u"price"),
         max_digits=8,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text=_("The cost of the item."),
+        help_text=_(u"The cost of the item."),
     )
     stock = models.IntegerField(
-        _("stock"),
+        _(u"stock"),
         default='0',
     )
+    weight = models.FloatField(
+        _(u"weight"),
+        default=0.0,
+    )
+    height = models.FloatField(
+        _(u"height"),
+        default=0.0,
+    )
+    length = models.FloatField(
+        _(u"length"),
+        default=0.0,
+    )
+    width = models.FloatField(
+        _(u"width"),
+        default=0.0,
+    )
+    shipping_required = models.BooleanField(
+        _(u"shipping required"),
+        default=True,
+    )
     short_description = models.TextField(
-        _("short description of the product."),
+        _(u"short description of the product."),
         max_length=200,
         default='',
         blank=True,
-        help_text=_("This should be a 1 or 2 line description of the product."),
+        help_text=_(u"This should be a 1 or 2 line description of the product."),
     )
     description = models.TextField(
-        _("description"),
+        _(u"description"),
         null=True,
         blank=True,
-        help_text=_("This should be a more lengthy description of the product."),
+        help_text=_(u"This should be a more lengthy description of the product."),
     )
     meta = models.TextField(
-        _("meta description"),
+        _(u"meta description"),
         max_length=200,
         blank=True,
         null=True,
-        help_text=_("The meta description of the product."),
+        help_text=_(u"The meta description of the product."),
     )
     active = models.BooleanField(
-        _("active"),
+        _(u"active"),
         default=True,
-        help_text=_("Denotes if the product is available or not."),
+        help_text=_(u"Denotes if the product is available or not."),
     )
-
-    # objects = ProductManager()
 
     def _get_main_category(self):
         """Return the first category for the product"""
