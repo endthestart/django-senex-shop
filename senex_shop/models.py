@@ -87,7 +87,6 @@ class Category(models.Model):
     related_categories = models.ManyToManyField(
         'self',
         blank=True,
-        null=True,
         verbose_name=_('related categories'),
         related_name='related_categories',
     )

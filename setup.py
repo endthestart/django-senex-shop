@@ -28,7 +28,6 @@ setup(name='django-senex-shop',
       zip_safe=False,
       install_requires=[
           'Pillow',
-          'South',
           'django-countries',
           'django-localflavor',
           'easy-thumbnails',
