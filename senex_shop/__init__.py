@@ -1,4 +1,4 @@
-__version__ = '0.3.0'
+__version__ = '0.3.1'
 
 def active_product_types():
     """Get a list of activated product modules, in the form of
