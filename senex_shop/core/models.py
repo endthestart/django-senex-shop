@@ -71,6 +71,11 @@ class Shop(Address):
         _('phone'),
         help_text=_("The phone number of the company."),
     )
+    map_url = models.TextField(
+        _(u"map url"),
+        blank=True,
+        help_text=_(u"An embedded map url to include on the contact page.")
+    )
     meta_title = models.CharField(
         _(u"meta title"),
         blank=True,

@@ -368,6 +368,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
         :param kwargs:
         :return:
         """
+        import pdb; pdb.set_trace()
         token = self.request.POST.get('stripeToken', None)
         if not token:
             return HttpResponseRedirect(reverse('checkout_payment_details'))
@@ -401,7 +402,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
                     customer=customer.id
                 )
             except (stripe.CardError, stripe.InvalidRequestError) as e:
-                messages.error(e)
+                messages.error(self.request, e)
                 self.restore_frozen_cart(self.request.cart)
                 self.preview = False
                 return self.render_to_response(self.get_context_data(error=e.message))
@@ -415,7 +416,7 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
                     description=email
                 )
             except (stripe.CardError, stripe.InvalidRequestError) as e:
-                messages.error(e)
+                messages.error(self.request, e)
                 self.restore_frozen_cart(self.request.cart)
                 self.preview = False
                 return self.render_to_response(self.get_context_data(error=e.message))

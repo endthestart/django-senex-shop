@@ -43,9 +43,11 @@ class ShippingModule(models.Model):
         if self.free_shipping_threshold is not None and cart.subtotal >= self.free_shipping_threshold:
             return Decimal("0.00")
 
-        charge = self.price_per_order
-        for item in cart.cartitem_set.all():
-            if item.product.shipping_required:
-                charge += item.quantity * self.price_per_item
+        charge = Decimal("0.00")
+        if cart.num_items > 0:
+            charge = self.price_per_order
+            for item in cart.cartitem_set.all():
+                if item.product.shipping_required:
+                    charge += item.quantity * self.price_per_item
 
         return charge

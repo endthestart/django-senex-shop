@@ -73,9 +73,12 @@ class Cart(models.Model):
         return False
 
     def calculate_shipping(self):
-        shop = Shop.objects.get(pk=1)
-        shipping_method = shop.shipping_module
-        return shipping_method.calculate(cart=self)
+        if self.is_shipping_required():
+            shop = Shop.objects.get(pk=1)
+            shipping_method = shop.shipping_module
+            return shipping_method.calculate(cart=self)
+        else:
+            return Decimal("0.00")
 
     @property
     def weight(self):

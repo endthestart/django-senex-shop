@@ -223,6 +223,14 @@ class Product(models.Model):
         _(u"shipping required"),
         default=True,
     )
+    shipping_price = models.DecimalField(
+        _(u"shipping price"),
+        max_digits=8,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        help_text=_(u"The fixed shiping cost of the item."),
+    )
     short_description = models.TextField(
         _(u"short description of the product."),
         max_length=200,

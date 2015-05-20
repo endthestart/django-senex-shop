@@ -112,7 +112,7 @@ class OrderPlacementMixin(CheckoutSessionMixin):
         email_text = render_to_string(text_template, context)
         email_html = render_to_string(html_template, context)
         email_subject = render_to_string(subject_template, context)
-        email = EmailMultiAlternatives(email_subject, email_text, 'info@senexcycles.com', [order.user.email])
+        email = EmailMultiAlternatives(email_subject, email_text, 'info@senexcycles.com', [order.email])
         email.attach_alternative(email_html, "text/html")
         email.send()
 
