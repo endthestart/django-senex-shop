@@ -368,7 +368,6 @@ class PaymentDetailsView(OrderPlacementMixin, TemplateView):
         :param kwargs:
         :return:
         """
-        import pdb; pdb.set_trace()
         token = self.request.POST.get('stripeToken', None)
         if not token:
             return HttpResponseRedirect(reverse('checkout_payment_details'))
