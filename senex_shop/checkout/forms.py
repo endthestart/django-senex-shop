@@ -40,7 +40,7 @@ class UserAddressForm(AbstractAddressForm):
 
 
 class GatewayForm(AuthenticationForm):
-    username = forms.EmailField(label=_("My email address is:"))
+    username = forms.EmailField(label=_("My email address is: (required)"))
     GUEST, NEW, EXISTING = 'anonymous', 'new', 'existing'
     CHOICES = (
         (NEW, _("No, I am a new customer.")),
